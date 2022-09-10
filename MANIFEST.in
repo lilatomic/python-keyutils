@@ -1,1 +1,2 @@
 include AUTHORS ChangeLog INSTALL LICENSE README.rst TODO
+include keyutils/_keyutils.c
