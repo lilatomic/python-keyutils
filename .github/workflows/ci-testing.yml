@@ -30,6 +30,10 @@ jobs:
         with:
           python-version: ${{ matrix.python-version }}
 
+      - name: Install C dependencies
+        run: |
+          sudo apt-get install -y keyutils libkeyutils-dev
+
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip setuptools wheel
