@@ -56,6 +56,6 @@ setup(
             libraries=['keyutils'],
         ),
     ],
-    setup_requires=["pytest-runner"],
-    tests_require=["pytest"],
+    setup_requires=[],
+    tests_require=["pytest", "pytest-runner"],
 )
