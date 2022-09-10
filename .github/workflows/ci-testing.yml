@@ -17,8 +17,8 @@ jobs:
         include:
           - platform: "ubuntu-18.04"
             python-version: "2.7"
-          - platform: "ubuntu-18.04"
-            python-version: "3.4"
+#          - platform: "ubuntu-18.04"
+#            python-version: "3.4"
           - platform: "ubuntu-18.04"
             python-version: "3.6"
 
