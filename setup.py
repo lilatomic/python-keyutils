@@ -17,21 +17,23 @@
 
 
 import io
-from setuptools import setup, Extension
 
-with io.open('README.rst', "r", encoding="utf-8") as f:
+from setuptools import Extension, setup
+
+
+with io.open("README.rst", "r", encoding="utf-8") as f:
     long_description = f.read()
 
 setup(
-    name='keyutils',
-    version='0.6',
-    description='keyutils bindings for Python',
+    name="keyutils",
+    version="0.6",
+    description="keyutils bindings for Python",
     long_description=long_description,
-    author='Mihai Ibanescu',
-    author_email='mihai.ibanescu@sas.com',
-    url='https://github.com/sassoftware/python-keyutils',
-    license='Apache 2.0',
-    packages=['keyutils'],
+    author="Mihai Ibanescu",
+    author_email="mihai.ibanescu@sas.com",
+    url="https://github.com/sassoftware/python-keyutils",
+    license="Apache 2.0",
+    packages=["keyutils"],
     classifiers=[
         "Topic :: Security",
         "Operating System :: POSIX :: Linux",
@@ -45,15 +47,15 @@ setup(
         "Programming Language :: Python :: 3.9",
         "Programming Language :: Python :: 3.10",
         "Programming Language :: Python :: 3.11",
-        ],
+    ],
     platforms=[
         "Linux",
-        ],
+    ],
     ext_modules=[
         Extension(
-            'keyutils._keyutils',
-            ['keyutils/_keyutils.pyx'],
-            libraries=['keyutils'],
+            "keyutils._keyutils",
+            ["keyutils/_keyutils.pyx"],
+            libraries=["keyutils"],
         ),
     ],
     setup_requires=[],

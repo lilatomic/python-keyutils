@@ -22,6 +22,7 @@ import unittest
 
 import keyutils
 
+
 class BasicTest(unittest.TestCase):
     def testSet(self):
         keyDesc = b"test:key:01"
@@ -36,7 +37,7 @@ class BasicTest(unittest.TestCase):
         try:
             keyutils.read_key(12345)
         except keyutils.Error as e:
-            self.assertEqual(e.args, (126, 'Required key not available'))
+            self.assertEqual(e.args, (126, "Required key not available"))
 
         keyutils.add_key(keyDesc, keyVal, keyring)
         keyId = keyutils.request_key(keyDesc, keyring)
@@ -49,17 +50,16 @@ class BasicTest(unittest.TestCase):
         val = b"asdfasdfasdf"
         session = keyutils.join_session_keyring()
         keyId = keyutils.add_key(desc, val, session)
-        self.assertEqual(keyutils.search(keyutils.KEY_SPEC_SESSION_KEYRING,
-            desc), keyId)
+        self.assertEqual(
+            keyutils.search(keyutils.KEY_SPEC_SESSION_KEYRING, desc), keyId
+        )
         keyutils.join_session_keyring()
-        self.assertEqual(keyutils.search(keyutils.KEY_SPEC_SESSION_KEYRING,
-            desc), None)
+        self.assertEqual(keyutils.search(keyutils.KEY_SPEC_SESSION_KEYRING, desc), None)
 
     def testRevoke(self):
         desc = b"dummy"
         session = keyutils.join_session_keyring()
-        self.assertEqual(keyutils.search(keyutils.KEY_SPEC_SESSION_KEYRING,
-            desc), None)
+        self.assertEqual(keyutils.search(keyutils.KEY_SPEC_SESSION_KEYRING, desc), None)
         keyutils.revoke(session)
         try:
             keyutils.search(keyutils.KEY_SPEC_SESSION_KEYRING, desc)
@@ -77,8 +77,8 @@ class BasicTest(unittest.TestCase):
             pid, exitcode = os.waitpid(childpid, 0)
             self.assertEqual(childpid, pid)
             self.assertTrue(
-                os.WIFEXITED(exitcode) and os.WEXITSTATUS(exitcode) == 0,
-                exitcode)
+                os.WIFEXITED(exitcode) and os.WEXITSTATUS(exitcode) == 0, exitcode
+            )
         else:
             rc = 1
             try:
@@ -88,14 +88,16 @@ class BasicTest(unittest.TestCase):
             finally:
                 os._exit(rc)
 
-        self.assertEqual(keyutils.search(keyutils.KEY_SPEC_SESSION_KEYRING,
-            desc), None)
-
+        self.assertEqual(keyutils.search(keyutils.KEY_SPEC_SESSION_KEYRING, desc), None)
 
     def testLink(self):
         desc = b"key1"
-        child = keyutils.add_key(b"ring1", None, keyutils.KEY_SPEC_PROCESS_KEYRING, b"keyring")
-        parent = keyutils.add_key(b"ring2", None, keyutils.KEY_SPEC_PROCESS_KEYRING, b"keyring")
+        child = keyutils.add_key(
+            b"ring1", None, keyutils.KEY_SPEC_PROCESS_KEYRING, b"keyring"
+        )
+        parent = keyutils.add_key(
+            b"ring2", None, keyutils.KEY_SPEC_PROCESS_KEYRING, b"keyring"
+        )
         keyId = keyutils.add_key(desc, b"dummy", child)
         self.assertEqual(keyutils.search(child, desc), keyId)
         self.assertEqual(keyutils.search(parent, desc), None)
@@ -140,7 +142,7 @@ class BasicTest(unittest.TestCase):
         key_id = keyutils.add_key(desc, value, keyring)
 
         ret = keyutils.describe_key(key_id)
-        ktype, _, _, kperm, kdesc = ret.split(b';', 4)
+        ktype, _, _, kperm, kdesc = ret.split(b";", 4)
         self.assertEqual(ktype, b"user")
         self.assertEqual(desc, kdesc)
 
@@ -162,16 +164,15 @@ class BasicTest(unittest.TestCase):
 
         key_id = keyutils.add_key(desc, value, keyring)
 
-        ktype, _, _, kperm, kdesc = keyutils.describe_key(key_id).split(b';', 4)
+        ktype, _, _, kperm, kdesc = keyutils.describe_key(key_id).split(b";", 4)
         kperm = int(kperm, base=16)
-        self.assertEqual(
-            keyutils.KEY_POS_READ, kperm & keyutils.KEY_POS_READ)
+        self.assertEqual(keyutils.KEY_POS_READ, kperm & keyutils.KEY_POS_READ)
         keyutils.set_perm(key_id, kperm - keyutils.KEY_POS_READ)
 
-        ktype, _, _, kperm, kdesc = keyutils.describe_key(key_id).split(b';', 4)
+        ktype, _, _, kperm, kdesc = keyutils.describe_key(key_id).split(b";", 4)
         kperm = int(kperm, base=16)
         self.assertEqual(0, kperm & keyutils.KEY_POS_READ)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     sys.exit(unittest.main())

@@ -17,15 +17,25 @@
 
 from __future__ import absolute_import
 
-
 from . import _keyutils
+
+
 for k, v in _keyutils.constants.__dict__.items():
     globals()[k] = v
 del k, v
 
-from errno import EINVAL, ENOMEM, EDQUOT, EINTR, EACCES
+
+from errno import (  # noqa: F401,E402 , imported for reexport; TODO: better reexport
+    EACCES,
+    EDQUOT,
+    EINTR,
+    EINVAL,
+    ENOMEM,
+)
+
 
 Error = _keyutils.error
+
 
 def add_key(key, value, keyring, keyType=b"user"):
     return _keyutils.add_key(keyType, key, value, keyring)
