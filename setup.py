@@ -29,9 +29,9 @@ setup(
     version="0.6",
     description="keyutils bindings for Python",
     long_description=long_description,
-    author="Mihai Ibanescu",
-    author_email="mihai.ibanescu@sas.com",
-    url="https://github.com/sassoftware/python-keyutils",
+    author="Daniel Goldman",
+    author_email="danielgoldman4@gmail.com",
+    url="https://github.com/lilatomic/python-keyutils",
     license="Apache 2.0",
     packages=["keyutils"],
     classifiers=[

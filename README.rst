@@ -1,9 +1,3 @@
-**python-keyutils -- Archived Repository**
-
-**Notice: This repository is part of a Conary/rpath project at SAS that is no longer supported or maintained. Hence, the repository is being archived and will live in a read-only state moving forward. Issues, pull requests, and changes will no longer be accepted.**
-
-===============
-
 python-keyutils is a set of python bindings for keyutils (available from
 http://people.redhat.com/~dhowells/keyutils), a key management suite that
 leverages the infrastructure provided by the Linux kernel for safely storing
@@ -46,3 +40,8 @@ For example:
 
 
 Further examples can be found in the ``test`` subfolder.
+
+History
+~~~~~~~
+
+This project was part of the Conary/rpath project at SAS that is no longer supported or maintained. This project is a fork maintained by me!
