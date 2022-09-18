@@ -1,0 +1,53 @@
+name: Tests
+
+on:
+  push:
+    branches: [main, master]
+  pull_request:
+    branches: [main, master]
+
+
+jobs:
+  build:
+    runs-on: ${{ matrix.platform }}
+    strategy:
+      matrix:
+        platform: ["ubuntu-20.04"]
+        python-version: ["2.7", "3.5", "3.6", "3.7", "3.8", "3.9", "3.10"]
+        include:
+          - platform: "ubuntu-18.04"
+            python-version: "2.7"
+#          - platform: "ubuntu-18.04"
+#            python-version: "3.4"
+          - platform: "ubuntu-18.04"
+            python-version: "3.6"
+
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v2
+        with:
+          python-version: ${{ matrix.python-version }}
+
+      - name: Install C dependencies
+        run: |
+          sudo apt-get install -y keyutils libkeyutils-dev
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip setuptools wheel
+          pip install coverage[toml] virtualenv tox tox-gh-actions
+
+      - name: Test with tox
+        run: tox
+        #env:
+        #  PLATFORM: ${{ matrix.platform }}
+
+      # from https://github.com/codecov/codecov-action
+      - name: Upload coverage to Codecov
+        uses: codecov/codecov-action@v2
+        with:
+          files: ./coverage.xml
+          fail_ci_if_error: true
+          verbose: true

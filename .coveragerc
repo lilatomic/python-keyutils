@@ -1,0 +1,17 @@
+[paths]
+source =
+    keyutils
+    */site-packages
+
+[run]
+branch = true
+source =
+    keyutils
+parallel = true
+
+[report]
+show_missing = true
+precision = 2
+omit = *migrations*
+exclude_lines =
+    if __name__ == .__main__.:
