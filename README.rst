@@ -1,4 +1,4 @@
-python-keyutils is a set of python bindings for keyutils (available from
+turkeyutils is a set of python bindings for keyutils (available from
 http://people.redhat.com/~dhowells/keyutils), a key management suite that
 leverages the infrastructure provided by the Linux kernel for safely storing
 and retrieving sensitive infromation in your programs.

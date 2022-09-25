@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 #
-# Copyright (c) SAS Institute Inc.
+# Copyright (c) SAS Institute Inc. and contributors
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -25,13 +25,13 @@ with io.open("README.rst", "r", encoding="utf-8") as f:
     long_description = f.read()
 
 setup(
-    name="keyutils",
+    name="turkeyutils",
     version="0.6",
     description="keyutils bindings for Python",
     long_description=long_description,
     author="Daniel Goldman",
     author_email="danielgoldman4@gmail.com",
-    url="https://github.com/lilatomic/python-keyutils",
+    url="https://github.com/lilatomic/turkeyutils",
     license="Apache 2.0",
     packages=["keyutils"],
     classifiers=[
