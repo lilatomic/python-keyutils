@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 #
 # Copyright (c) SAS Institute Inc. and contributors
 #
@@ -15,13 +15,11 @@
 # limitations under the License.
 #
 
-
-import io
-
 from setuptools import Extension, setup
+from Cython.Build import cythonize
 
 
-with io.open("README.rst", "r", encoding="utf-8") as f:
+with open("README.rst", "r", encoding="utf-8") as f:
     long_description = f.read()
 
 setup(
@@ -46,13 +44,13 @@ setup(
     platforms=[
         "Linux",
     ],
-    ext_modules=[
+    ext_modules=cythonize([
         Extension(
             "keyutils._keyutils",
             ["keyutils/_keyutils.pyx"],
             libraries=["keyutils"],
         ),
-    ],
+    ]),
     setup_requires=[],
     tests_require=["pytest", "pytest-runner"],
 )
