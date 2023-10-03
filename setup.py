@@ -15,8 +15,8 @@
 # limitations under the License.
 #
 
-from setuptools import Extension, setup
 from Cython.Build import cythonize
+from setuptools import Extension, setup
 
 
 with open("README.rst", "r", encoding="utf-8") as f:
