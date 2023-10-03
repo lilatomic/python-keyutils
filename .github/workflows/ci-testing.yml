@@ -12,15 +12,8 @@ jobs:
     runs-on: ${{ matrix.platform }}
     strategy:
       matrix:
-        platform: ["ubuntu-20.04"]
-        python-version: ["2.7", "3.5", "3.6", "3.7", "3.8", "3.9", "3.10"]
-        include:
-          - platform: "ubuntu-18.04"
-            python-version: "2.7"
-#          - platform: "ubuntu-18.04"
-#            python-version: "3.4"
-          - platform: "ubuntu-18.04"
-            python-version: "3.6"
+        platform: ["ubuntu-22.04"]
+        python-version: ["3.8", "3.9", "3.10", "3.11", "3.12"]
 
     steps:
       - uses: actions/checkout@v2
