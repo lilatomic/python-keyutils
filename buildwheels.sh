@@ -12,12 +12,9 @@ function repair_wheel {
     fi
 }
 
-yum install -y keyutils-libs-devel
-
 # Compile wheels
 for version in "${python_versions[@]}"; do
     PYBIN="/opt/python/cp$version-cp$version/bin"
-    "${PYBIN}/pip" install cython
     "${PYBIN}/pip" wheel /io/ --no-deps -w dist/
     repair_wheel dist/*-cp$version-cp$version*whl
 done
