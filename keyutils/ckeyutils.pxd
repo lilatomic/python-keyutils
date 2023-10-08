@@ -47,17 +47,18 @@ cdef extern from "keyutils.h" nogil:
     int EKEYEXPIRED "EKEYEXPIRED"
     int EKEYREVOKED "EKEYREVOKED"
     int EKEYREJECTED "EKEYREJECTED"
+
     int add_key "add_key"(char *key_type, char *description, void *payload, int plen, int keyring)
     int request_key "request_key"(char *key_type, char *description, char *callout_info, int keyring)
-    int search "keyctl_search"(int keyring, char *key_type, char *description, int destination)
-    int update "keyctl_update"(int key, const void *payload, size_t plen)
-    int read_alloc "keyctl_read_alloc"(int key, void **bufptr)
     int join_session_keyring "keyctl_join_session_keyring"(char *name)
-    int session_to_parent "keyctl_session_to_parent"()
-    int link "keyctl_link"(int key, int keyring)
-    int unlink "keyctl_unlink"(int key, int keyring)
+    int update "keyctl_update"(int key, const void *payload, size_t plen)
     int revoke "keyctl_revoke"(int key)
     int setperm "keyctl_setperm"(int key, int perm)
-    int set_timeout "keyctl_set_timeout" (int key, int timeout)
-    int clear "keyctl_clear" (int keyring)
-    int describe_alloc "keyctl_describe_alloc" (int key, char **bufptr)
+    int clear "keyctl_clear"(int keyring)
+    int link "keyctl_link"(int key, int keyring)
+    int unlink "keyctl_unlink"(int key, int keyring)
+    int search "keyctl_search"(int keyring, char *key_type, char *description, int destination)
+    int set_timeout "keyctl_set_timeout"(int key, int timeout)
+    int session_to_parent "keyctl_session_to_parent"()
+    int describe_alloc "keyctl_describe_alloc"(int key, char **bufptr)
+    int read_alloc "keyctl_read_alloc"(int key, void ** bufptr)

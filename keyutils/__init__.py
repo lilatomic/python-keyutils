@@ -24,7 +24,6 @@ for k, v in _keyutils.constants.__dict__.items():
     globals()[k] = v
 del k, v
 
-
 from errno import (  # noqa: F401,E402 , imported for reexport; TODO: better reexport
     EACCES,
     EDQUOT,
@@ -50,33 +49,25 @@ def request_key(key, keyring, keyType=b"user"):
         raise
 
 
-def search(keyring, description, destination=0, keyType=b"user"):
-    try:
-        return _keyutils.search(keyring, keyType, description, destination)
-    except Error as err:
-        if err.args[0] == _keyutils.constants.ENOKEY:
-            return None
-        raise
+def join_session_keyring(name=None):
+    return _keyutils.join_session_keyring(name)
 
 
 def update_key(key, value):
     return _keyutils.update_key(key, value)
 
 
-def read_key(keyId):
-    return _keyutils.read_key(keyId)
+def revoke(key):
+    return _keyutils.revoke(key)
 
 
-def describe_key(keyId):
-    return _keyutils.describe_key(keyId)
+def set_perm(key, perm):
+    return _keyutils.set_perm(key, perm)
 
 
-def join_session_keyring(name=None):
-    return _keyutils.join_session_keyring(name)
-
-
-def session_to_parent():
-    return _keyutils.session_to_parent()
+def clear(keyring):
+    """Clear the keyring."""
+    return _keyutils.clear(keyring)
 
 
 def link(key, keyring):
@@ -87,8 +78,13 @@ def unlink(key, keyring):
     return _keyutils.unlink(key, keyring)
 
 
-def revoke(key):
-    return _keyutils.revoke(key)
+def search(keyring, description, destination=0, keyType=b"user"):
+    try:
+        return _keyutils.search(keyring, keyType, description, destination)
+    except Error as err:
+        if err.args[0] == _keyutils.constants.ENOKEY:
+            return None
+        raise
 
 
 def set_timeout(key, timeout):
@@ -96,10 +92,13 @@ def set_timeout(key, timeout):
     return _keyutils.set_timeout(key, timeout)
 
 
-def set_perm(key, perm):
-    return _keyutils.set_perm(key, perm)
+def session_to_parent():
+    return _keyutils.session_to_parent()
 
 
-def clear(keyring):
-    """Clear the keyring."""
-    return _keyutils.clear(keyring)
+def describe_key(keyId):
+    return _keyutils.describe_key(keyId)
+
+
+def read_key(keyId):
+    return _keyutils.read_key(keyId)
