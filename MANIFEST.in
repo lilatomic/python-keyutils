@@ -1,2 +1,2 @@
 include AUTHORS ChangeLog INSTALL LICENSE README.rst TODO
-include keyutils/_keyutils.c keyutils/_keyutils.pyx
+include keyutils/_keyutils.c keyutils/ckeyutils.pxd keyutils/_keyutils.pyx
