@@ -16,7 +16,9 @@
 #
 
 from libc cimport stdlib
+
 from cython.cimports.keyutils import ckeyutils
+
 
 cdef extern from "Python.h":
     object PyErr_SetFromErrno(exc)
