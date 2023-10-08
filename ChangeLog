@@ -1,3 +1,10 @@
+Changes in 0.6.1 (2023-10-08):
+  * Add manylinux bdist
+  * Use `cythonize` for building
+  * Use pxd for keyutils
+  * Added python 3.10, 3.11
+  * Dropped python 2.7, 3.6, 3.7
+
 Changes in 0.6 (2019-02-01):
   * Pull request #1 from Anvil (debian directory for .deb creation)
   * Pull request #5 from coldfix/travis
