@@ -12,21 +12,14 @@ jobs:
     runs-on: ${{ matrix.platform }}
     strategy:
       matrix:
-        platform: ["ubuntu-20.04"]
-        python-version: ["2.7", "3.5", "3.6", "3.7", "3.8", "3.9", "3.10"]
-        include:
-          - platform: "ubuntu-18.04"
-            python-version: "2.7"
-#          - platform: "ubuntu-18.04"
-#            python-version: "3.4"
-          - platform: "ubuntu-18.04"
-            python-version: "3.6"
+        platform: ["ubuntu-22.04"]
+        python-version: ["3.8", "3.9", "3.10", "3.11"]
 
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v4
 
       - name: Set up Python ${{ matrix.python-version }}
-        uses: actions/setup-python@v2
+        uses: actions/setup-python@v3
         with:
           python-version: ${{ matrix.python-version }}
 
@@ -36,8 +29,9 @@ jobs:
 
       - name: Install dependencies
         run: |
+          python --version
           python -m pip install --upgrade pip setuptools wheel
-          pip install coverage[toml] virtualenv tox tox-gh-actions
+          pip install coverage[toml] virtualenv tox tox-gh-actions cython
 
       - name: Test with tox
         run: tox
@@ -46,7 +40,7 @@ jobs:
 
       # from https://github.com/codecov/codecov-action
       - name: Upload coverage to Codecov
-        uses: codecov/codecov-action@v2
+        uses: codecov/codecov-action@v3
         with:
           files: ./coverage.xml
           fail_ci_if_error: true

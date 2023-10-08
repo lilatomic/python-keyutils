@@ -12,14 +12,14 @@ jobs:
     runs-on: ${{ matrix.platform }}
     strategy:
       matrix:
-        platform: [ubuntu-latest]
-        python-version: ["2.7", "3.6", "3.10"]
+        platform: ["ubuntu-22.04"]
+        python-version: ["3.8", "3.11"]
 
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v4
 
       - name: Set up Python ${{ matrix.python-version }}
-        uses: actions/setup-python@v2
+        uses: actions/setup-python@v3
         with:
           python-version: ${{ matrix.python-version }}
 
@@ -29,8 +29,9 @@ jobs:
 
       - name: Install dependencies
         run: |
+          python --version
           python -m pip install --upgrade pip setuptools wheel
-          pip install virtualenv tox tox-gh-actions
+          pip install virtualenv tox tox-gh-actions cython
 
       - name: Test Lint
         run: tox -e lint,radon

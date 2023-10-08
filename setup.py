@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 #
 # Copyright (c) SAS Institute Inc. and contributors
 #
@@ -15,13 +15,11 @@
 # limitations under the License.
 #
 
-
-import io
-
+from Cython.Build import cythonize
 from setuptools import Extension, setup
 
 
-with io.open("README.rst", "r", encoding="utf-8") as f:
+with open("README.rst", "r", encoding="utf-8") as f:
     long_description = f.read()
 
 setup(
@@ -37,27 +35,22 @@ setup(
     classifiers=[
         "Topic :: Security",
         "Operating System :: POSIX :: Linux",
-        "Programming Language :: Python :: 2.7",
-        "Programming Language :: Python :: 3.3",
-        "Programming Language :: Python :: 3.4",
-        "Programming Language :: Python :: 3.5",
-        "Programming Language :: Python :: 3.6",
-        "Programming Language :: Python :: 3.7",
         "Programming Language :: Python :: 3.8",
         "Programming Language :: Python :: 3.9",
         "Programming Language :: Python :: 3.10",
         "Programming Language :: Python :: 3.11",
+        "Programming Language :: Python :: 3.12",
     ],
     platforms=[
         "Linux",
     ],
-    ext_modules=[
+    ext_modules=cythonize([
         Extension(
             "keyutils._keyutils",
             ["keyutils/_keyutils.pyx"],
             libraries=["keyutils"],
         ),
-    ],
+    ]),
     setup_requires=[],
     tests_require=["pytest", "pytest-runner"],
 )
