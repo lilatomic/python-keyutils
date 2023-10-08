@@ -1,9 +1,13 @@
 cdef extern from "keyutils.h" nogil:
+    # special process keyring shortcut IDs
     int KEY_SPEC_THREAD_KEYRING "KEY_SPEC_THREAD_KEYRING"
     int KEY_SPEC_PROCESS_KEYRING "KEY_SPEC_PROCESS_KEYRING"
     int KEY_SPEC_SESSION_KEYRING "KEY_SPEC_SESSION_KEYRING"
     int KEY_SPEC_USER_KEYRING "KEY_SPEC_USER_KEYRING"
     int KEY_SPEC_USER_SESSION_KEYRING "KEY_SPEC_USER_SESSION_KEYRING"
+    int KEY_SPEC_GROUP_KEYRING "KEY_SPEC_GROUP_KEYRING"
+    int KEY_SPEC_REQKEY_AUTH_KEY "KEY_SPEC_REQKEY_AUTH_KEY"
+
     int KEY_POS_VIEW "KEY_POS_VIEW"
     int KEY_POS_READ "KEY_POS_READ"
     int KEY_POS_WRITE "KEY_POS_WRITE"
@@ -11,6 +15,8 @@ cdef extern from "keyutils.h" nogil:
     int KEY_POS_LINK "KEY_POS_LINK"
     int KEY_POS_SETATTR "KEY_POS_SETATTR"
     int KEY_POS_ALL "KEY_POS_ALL"
+
+    # user permissions...
     int KEY_USR_VIEW "KEY_USR_VIEW"
     int KEY_USR_READ "KEY_USR_READ"
     int KEY_USR_WRITE "KEY_USR_WRITE"
@@ -18,6 +24,8 @@ cdef extern from "keyutils.h" nogil:
     int KEY_USR_LINK "KEY_USR_LINK"
     int KEY_USR_SETATTR "KEY_USR_SETATTR"
     int KEY_USR_ALL "KEY_USR_ALL"
+
+    # group permissions...
     int KEY_GRP_VIEW "KEY_GRP_VIEW"
     int KEY_GRP_READ "KEY_GRP_READ"
     int KEY_GRP_WRITE "KEY_GRP_WRITE"
@@ -25,6 +33,8 @@ cdef extern from "keyutils.h" nogil:
     int KEY_GRP_LINK "KEY_GRP_LINK"
     int KEY_GRP_SETATTR "KEY_GRP_SETATTR"
     int KEY_GRP_ALL "KEY_GRP_ALL"
+
+    # third party permissions...
     int KEY_OTH_VIEW "KEY_OTH_VIEW"
     int KEY_OTH_READ "KEY_OTH_READ"
     int KEY_OTH_WRITE "KEY_OTH_WRITE"
@@ -32,6 +42,7 @@ cdef extern from "keyutils.h" nogil:
     int KEY_OTH_LINK "KEY_OTH_LINK"
     int KEY_OTH_SETATTR "KEY_OTH_SETATTR"
     int KEY_OTH_ALL "KEY_OTH_ALL"
+
     int ENOKEY "ENOKEY"
     int EKEYEXPIRED "EKEYEXPIRED"
     int EKEYREVOKED "EKEYREVOKED"
