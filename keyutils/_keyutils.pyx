@@ -15,9 +15,8 @@
 # limitations under the License.
 #
 
-from libc cimport stdlib
-
 from cython.cimports.keyutils import ckeyutils
+from libc cimport stdlib
 
 
 cdef extern from "Python.h":
@@ -75,6 +74,13 @@ class constants:
     EKEYREJECTED = ckeyutils.EKEYREJECTED
 
 
+def _throw_err(int rc):
+    if rc < 0:
+        PyErr_SetFromErrno(error)
+    else:
+        return rc
+
+
 def add_key(bytes key_type, bytes description, bytes payload, int keyring):
     cdef int rc
     cdef char *key_type_p = key_type
@@ -89,10 +95,7 @@ def add_key(bytes key_type, bytes description, bytes payload, int keyring):
         payload_len = len(payload)
     with nogil:
         rc = ckeyutils.add_key(key_type_p, desc_p, payload_p, payload_len, keyring)
-    if rc < 0:
-        PyErr_SetFromErrno(error)
-    else:
-        return rc
+    return _throw_err(rc)
 
 def request_key(bytes key_type, bytes description, bytes callout_info, int keyring):
     cdef char *key_type_p = key_type
@@ -105,10 +108,8 @@ def request_key(bytes key_type, bytes description, bytes callout_info, int keyri
         callout_p = callout_info
     with nogil:
         rc = ckeyutils.request_key(key_type_p, desc_p, callout_p, keyring)
-    if rc < 0:
-        PyErr_SetFromErrno(error)
-    else:
-        return rc
+    return _throw_err(rc)
+
 
 def join_session_keyring(name):
     cdef char *name_p
@@ -119,10 +120,8 @@ def join_session_keyring(name):
         name_p = name
     with nogil:
         rc = ckeyutils.join_session_keyring(name_p)
-    if rc < 0:
-        PyErr_SetFromErrno(error)
-    else:
-        return rc
+    return _throw_err(rc)
+
 
 def update_key(int key, bytes payload):
     cdef int rc
@@ -136,56 +135,44 @@ def update_key(int key, bytes payload):
         payload_len = len(payload)
     with nogil:
         rc = ckeyutils.update(key, payload_p, payload_len)
-    if rc < 0:
-        PyErr_SetFromErrno(error)
-    else:
-        return None
+    _throw_err(rc)
+    return None
 
 def revoke(int key):
     cdef int rc
     with nogil:
         rc = ckeyutils.revoke(key)
-    if rc < 0:
-        PyErr_SetFromErrno(error)
-    else:
-        return None
+    _throw_err(rc)
+    return None
 
 def set_perm(int key, int perm):
     cdef int rc
     cdef int keyperm
     with nogil:
         rc = ckeyutils.setperm(key, perm)
-    if rc < 0:
-        PyErr_SetFromErrno(error)
-    else:
-        return None
+    _throw_err(rc)
+    return None
 
 def clear(int keyring):
     cdef int rc
     with nogil:
         rc = ckeyutils.clear(keyring)
-    if rc < 0:
-        PyErr_SetFromErrno(error)
-    else:
-        return None
+    _throw_err(rc)
+    return None
 
 def link(int key, int keyring):
     cdef int rc
     with nogil:
         rc = ckeyutils.link(key, keyring)
-    if rc < 0:
-        PyErr_SetFromErrno(error)
-    else:
-        return None
+    _throw_err(rc)
+    return None
 
 def unlink(int key, int keyring):
     cdef int rc
     with nogil:
         rc = ckeyutils.unlink(key, keyring)
-    if rc < 0:
-        PyErr_SetFromErrno(error)
-    else:
-        return None
+    _throw_err(rc)
+    return None
 
 def search(int keyring, bytes key_type, bytes description, int destination):
     cdef char *key_type_p = key_type
@@ -193,28 +180,21 @@ def search(int keyring, bytes key_type, bytes description, int destination):
     cdef int rc
     with nogil:
         rc = ckeyutils.search(keyring, key_type_p, desc_p, destination)
-    if rc < 0:
-        PyErr_SetFromErrno(error)
-    else:
-        return rc
+    return _throw_err(rc)
 
 def set_timeout(int key, int timeout):
     cdef int rc
     with nogil:
         rc = ckeyutils.set_timeout(key, timeout)
-    if rc < 0:
-        PyErr_SetFromErrno(error)
-    else:
-        return None
+    _throw_err(rc)
+    return None
 
 def session_to_parent():
     cdef int rc
     with nogil:
         rc = ckeyutils.session_to_parent()
-    if rc < 0:
-        PyErr_SetFromErrno(error)
-    else:
-        return None
+    _throw_err(rc)
+    return None
 
 def describe_key(int key):
     cdef int size
