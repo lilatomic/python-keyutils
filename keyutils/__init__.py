@@ -33,8 +33,13 @@ from errno import (  # noqa: F401,E402 , imported for reexport; TODO: better ree
 )
 
 
-Error = _keyutils.error
+KeyutilsError = _keyutils.error
 
+
+def _handle_keyerror(err: Exception):
+    if err.args[0] == _keyutils.constants.ENOKEY:
+        return None
+    raise err
 
 def add_key(key, value, keyring, keyType=b"user"):
     return _keyutils.add_key(keyType, key, value, keyring)
@@ -43,10 +48,14 @@ def add_key(key, value, keyring, keyType=b"user"):
 def request_key(key, keyring, keyType=b"user"):
     try:
         return _keyutils.request_key(keyType, key, None, keyring)
-    except Error as err:
-        if err.args[0] == _keyutils.constants.ENOKEY:
-            return None
-        raise
+    except KeyutilsError as err:
+        return _handle_keyerror(err)
+
+def get_keyring_id(key, create: bool):
+    try:
+        return _keyutils.get_keyring_id(key, create)
+    except KeyutilsError as err:
+        return _handle_keyerror(err)
 
 
 def join_session_keyring(name=None):
@@ -81,10 +90,8 @@ def unlink(key, keyring):
 def search(keyring, description, destination=0, keyType=b"user"):
     try:
         return _keyutils.search(keyring, keyType, description, destination)
-    except Error as err:
-        if err.args[0] == _keyutils.constants.ENOKEY:
-            return None
-        raise
+    except KeyutilsError as err:
+        return _handle_keyerror(err)
 
 
 def set_timeout(key, timeout):

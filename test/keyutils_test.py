@@ -33,10 +33,10 @@ class BasicTest(unittest.TestCase):
         keyId = keyutils.request_key(keyDesc, keyring)
         self.assertEqual(keyId, None)
 
-        self.assertRaises(keyutils.Error, keyutils.read_key, 12345)
+        self.assertRaises(keyutils.KeyutilsError, keyutils.read_key, 12345)
         try:
             keyutils.read_key(12345)
-        except keyutils.Error as e:
+        except keyutils.KeyutilsError as e:
             self.assertEqual(e.args, (126, "Required key not available"))
 
         keyutils.add_key(keyDesc, keyVal, keyring)
@@ -63,7 +63,7 @@ class BasicTest(unittest.TestCase):
         keyutils.revoke(session)
         try:
             keyutils.search(keyutils.KEY_SPEC_SESSION_KEYRING, desc)
-        except keyutils.Error as err:
+        except keyutils.KeyutilsError as err:
             self.assertEqual(err.args[0], keyutils.EKEYREVOKED)
         else:
             self.fail("Expected keyutils.Error")
@@ -117,7 +117,7 @@ class BasicTest(unittest.TestCase):
         time.sleep(1.5)
         try:
             keyId = keyutils.request_key(desc, keyring)
-        except keyutils.Error as err:
+        except keyutils.KeyutilsError as err:
             # https://patchwork.kernel.org/patch/5336901
             self.assertEqual(err.args[0], keyutils.EKEYEXPIRED)
             keyId = None
@@ -132,7 +132,7 @@ class BasicTest(unittest.TestCase):
 
         self.assertEqual(keyutils.request_key(desc, keyring), key_id)
         keyutils.clear(keyring)
-        self.assertRaises(keyutils.Error, keyutils.read_key, key_id)
+        self.assertRaises(keyutils.KeyutilsError, keyutils.read_key, key_id)
 
     def testDescribe(self):
         desc = b"dummyKey"
@@ -173,6 +173,10 @@ class BasicTest(unittest.TestCase):
         kperm = int(kperm, base=16)
         self.assertEqual(0, kperm & keyutils.KEY_POS_READ)
 
+
+def test_get_keyring_id():
+    keyring = keyutils.get_keyring_id(keyutils.KEY_SPEC_THREAD_KEYRING, False)
+    assert keyring is not None and keyring != 0
 
 if __name__ == "__main__":
     sys.exit(unittest.main())

@@ -1,4 +1,10 @@
+from libc.stdint cimport int32_t, uint32_t
+
 cdef extern from "keyutils.h" nogil:
+    ctypedef int32_t key_serial_t
+    ctypedef uint32_t uid_t
+    ctypedef uint32_t gid_t
+
     # special process keyring shortcut IDs
     int KEY_SPEC_THREAD_KEYRING "KEY_SPEC_THREAD_KEYRING"
     int KEY_SPEC_PROCESS_KEYRING "KEY_SPEC_PROCESS_KEYRING"
@@ -50,9 +56,11 @@ cdef extern from "keyutils.h" nogil:
 
     int add_key "add_key"(char *key_type, char *description, void *payload, int plen, int keyring)
     int request_key "request_key"(char *key_type, char *description, char *callout_info, int keyring)
+    key_serial_t get_keyring_id "keyctl_get_keyring_ID"(key_serial_t key, int create)
     int join_session_keyring "keyctl_join_session_keyring"(char *name)
     int update "keyctl_update"(int key, const void *payload, size_t plen)
     int revoke "keyctl_revoke"(int key)
+    int chown "keyctl_chown"(key_serial_t id, uid_t uid, gid_t gid);
     int setperm "keyctl_setperm"(int key, int perm)
     int clear "keyctl_clear"(int keyring)
     int link "keyctl_link"(int key, int keyring)

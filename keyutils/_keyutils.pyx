@@ -110,6 +110,11 @@ def request_key(bytes key_type, bytes description, bytes callout_info, int keyri
         rc = ckeyutils.request_key(key_type_p, desc_p, callout_p, keyring)
     return _throw_err(rc)
 
+def get_keyring_id(int keyring, bint create) -> int:
+    cdef int rc
+    with nogil:
+        rc = ckeyutils.get_keyring_id(keyring, create)
+    return _throw_err(rc)
 
 def join_session_keyring(name):
     cdef char *name_p
@@ -121,7 +126,6 @@ def join_session_keyring(name):
     with nogil:
         rc = ckeyutils.join_session_keyring(name_p)
     return _throw_err(rc)
-
 
 def update_key(int key, bytes payload):
     cdef int rc
