@@ -20,6 +20,8 @@ import sys
 import time
 import unittest
 
+import pytest
+
 import keyutils
 
 
@@ -177,6 +179,13 @@ class BasicTest(unittest.TestCase):
 def test_get_keyring_id():
     keyring = keyutils.get_keyring_id(keyutils.KEY_SPEC_THREAD_KEYRING, False)
     assert keyring is not None and keyring != 0
+
+
+@pytest.mark.skip
+class TestNeedsSudo:
+    def test_keyring_chown(self):
+        key_id = keyutils.add_key(b"chown_n", b"chown_v", keyutils.KEY_SPEC_THREAD_KEYRING)
+
 
 if __name__ == "__main__":
     sys.exit(unittest.main())

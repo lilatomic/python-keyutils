@@ -60,7 +60,7 @@ cdef extern from "keyutils.h" nogil:
     int join_session_keyring "keyctl_join_session_keyring"(char *name)
     int update "keyctl_update"(int key, const void *payload, size_t plen)
     int revoke "keyctl_revoke"(int key)
-    int chown "keyctl_chown"(key_serial_t id, uid_t uid, gid_t gid);
+    int chown "keyctl_chown"(key_serial_t key, uid_t uid, gid_t gid);
     int setperm "keyctl_setperm"(int key, int perm)
     int clear "keyctl_clear"(int keyring)
     int link "keyctl_link"(int key, int keyring)

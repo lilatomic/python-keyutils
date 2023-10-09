@@ -16,6 +16,7 @@
 #
 
 from cython.cimports.keyutils import ckeyutils
+from cython.cimports.keyutils.ckeyutils import gid_t, key_serial_t, uid_t
 from libc cimport stdlib
 
 
@@ -148,6 +149,12 @@ def revoke(int key):
         rc = ckeyutils.revoke(key)
     _throw_err(rc)
     return None
+
+def chown(key_serial_t key, uid_t uid, gid_t gid) -> int:
+    cdef rc
+    with nogil:
+        rc = ckeyutils.chown(key, uid, gid)
+    return _throw_err(rc)
 
 def set_perm(int key, int perm):
     cdef int rc

@@ -17,6 +17,8 @@
 
 from __future__ import absolute_import
 
+from typing import Union
+
 from . import _keyutils
 
 
@@ -68,6 +70,15 @@ def update_key(key, value):
 
 def revoke(key):
     return _keyutils.revoke(key)
+
+
+def chown(key, uid: Union[int, None], gid: Union[int, None]) -> None:
+    if uid is None:
+        uid = -1
+    if gid is None:
+        gid = -1
+    # TODO: map other errors
+    return _keyutils.chown(key, uid, gid)
 
 
 def set_perm(key, perm):
