@@ -25,6 +25,7 @@ from pathlib import Path
 import pytest
 
 import keyutils
+from test import crypt_utils
 
 
 class BasicTest(unittest.TestCase):
@@ -243,6 +244,32 @@ class TestInstantiate:
         with pytest.raises(keyutils.KeyutilsError) as e:
             key = keyutils.request_key(b"turkeyutils:reject", keyutils.KEY_SPEC_THREAD_KEYRING, callout_info=b"reject")
         assert e.value.args[0] == 128
+
+
+@pytest.fixture
+def dh_keys(tmpdir):
+    # TODO: this is a shim to make things go faster
+    regen = not Path("/tmp/dh/dh.pem").exists()
+    out = Path("/tmp/dh")
+
+    return crypt_utils.extract_dh_keyring_items(*crypt_utils.dh_keys(out, regen=regen))
+
+
+class TestDH:
+    def test_compute(self, dh_keys):
+        keys = {k: keyutils.add_key(k.encode("utf-8"), v, keyutils.KEY_SPEC_THREAD_KEYRING) for k, v in dh_keys.items()}
+
+        v = keyutils.dh_compute(keys["dh_priv"], keys["dh_prime"], keys["dh_base"])
+        assert v
+        assert len(v) == 520
+
+
+    def test_kdf(self, dh_keys):
+        keys = {k: keyutils.add_key(k.encode("utf-8"), v, keyutils.KEY_SPEC_THREAD_KEYRING) for k, v in dh_keys.items()}
+
+        v = keyutils.dh_compute_kdf(keys["dh_priv"], keys["dh_prime"], keys["dh_base"], b"sha512", 1024)
+        assert v
+        assert len(v) == 1024
 
 
 if __name__ == "__main__":

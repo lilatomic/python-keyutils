@@ -250,6 +250,42 @@ def invalidate(int key):
     _throw_err(rc)
     return None
 
+def dh_compute(int key_priv, int key_prime, int key_base):
+    cdef int size
+    cdef void *ptr
+    cdef bytes obj
+    with nogil:
+        size = ckeyutils.dh_compute_alloc(key_priv, key_prime, key_base, &ptr)
+    if size < 0:
+        PyErr_SetFromErrno(error)
+    else:
+        obj = PyBytes_FromStringAndSize(<char *> ptr, size)
+        stdlib.free(ptr)
+        return obj
+
+def dh_compute_kdf(int key_priv, int key_prime, int key_base, bytes hashname, int buflen, bytes otherinfo = None):
+    cdef int rc
+    cdef int otherinfo_len
+    cdef char *hashname_p = hashname
+    cdef char *otherinfo_p
+    cdef char *buffer = <char *>stdlib.malloc(buflen)
+    cdef bytes obj
+
+    if otherinfo is None:
+        otherinfo_p = NULL
+        otherinfo_len = 0
+    else:
+        otherinfo_p = otherinfo
+        otherinfo_len = len(otherinfo)
+
+    with nogil:
+        rc = ckeyutils.dh_compute_kdf(key_priv, key_prime, key_base, hashname_p, otherinfo_p, otherinfo_len, buffer, buflen)
+    _throw_err(rc)
+    # TODO: check we aren't leaving buffer allocated
+    obj = PyBytes_FromStringAndSize(<char *> buffer, buflen)
+    return obj
+
+
 def describe_key(int key):
     cdef int size
     cdef char *ptr
