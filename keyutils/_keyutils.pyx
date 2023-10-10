@@ -151,7 +151,7 @@ def revoke(int key):
     return None
 
 def chown(key_serial_t key, uid_t uid, gid_t gid) -> int:
-    cdef rc
+    cdef int rc
     with nogil:
         rc = ckeyutils.chown(key, uid, gid)
     return _throw_err(rc)
@@ -193,6 +193,28 @@ def search(int keyring, bytes key_type, bytes description, int destination):
         rc = ckeyutils.search(keyring, key_type_p, desc_p, destination)
     return _throw_err(rc)
 
+def instantiate(int key, bytes payload, int keyring):
+    cdef int rc
+    cdef int payload_len
+    cdef char *payload_p
+    if payload is None:
+        payload_p = NULL
+        payload_len = 0
+    else:
+        payload_p = payload
+        payload_len = len(payload)
+    with nogil:
+        rc = ckeyutils.instantiate(key, payload_p, payload_len, keyring)
+    _throw_err(rc)
+    return None
+
+def negate(int key, unsigned int timeout, int keyring):
+    cdef int rc
+    with nogil:
+        rc = ckeyutils.negate(key, timeout, keyring)
+    _throw_err(rc)
+    return None
+
 def set_timeout(int key, int timeout):
     cdef int rc
     with nogil:
@@ -200,10 +222,24 @@ def set_timeout(int key, int timeout):
     _throw_err(rc)
     return None
 
+def assume_authority(int key):
+    cdef int rc
+    with nogil:
+        rc = ckeyutils.assume_authority(key)
+    _throw_err(rc)
+    return None
+
 def session_to_parent():
     cdef int rc
     with nogil:
         rc = ckeyutils.session_to_parent()
+    _throw_err(rc)
+    return None
+
+def reject(int key, unsigned int timeout, unsigned int error, int keyring):
+    cdef int rc
+    with nogil:
+        rc = ckeyutils.reject(key, timeout, error, keyring)
     _throw_err(rc)
     return None
 

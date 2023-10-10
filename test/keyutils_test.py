@@ -17,8 +17,10 @@
 
 import os
 import sys
+import textwrap
 import time
 import unittest
+from pathlib import Path
 
 import pytest
 
@@ -185,6 +187,50 @@ def test_get_keyring_id():
 class TestNeedsSudo:
     def test_keyring_chown(self):
         key_id = keyutils.add_key(b"chown_n", b"chown_v", keyutils.KEY_SPEC_THREAD_KEYRING)
+
+
+@pytest.fixture
+def request_key(tmpdir):
+    # Create a launcher script to get around a parser limitation in `/sbin/request-key`.
+    # request-key will take the executable path as everything up to the last "/",
+    # which is a problem for having both the python and the script file with absolute paths.
+    # eg "/path/to/bin/python /path/to/script.py %k %d %c %S"
+    # is parsed as ["/path/to/bin/python /path/to/script.py", "%k", "%d", "%c", "%S"]
+    launcher_path = Path(tmpdir) / "key_req.sh"
+    with open(launcher_path, mode="w", encoding="utf-8") as launcher:
+        launcher.write(textwrap.dedent(f"""\
+            #!/bin/bash
+            {sys.executable} {Path(__file__).parent / "key_req.py"} $@
+            """))
+        os.chmod(launcher_path, 0o755)
+
+    with open(Path("/etc/request-key.d/turkeyutils.conf"), mode="w", encoding="utf-8") as config:
+        # add a config for to call into our executable for key requests
+        config.write(textwrap.dedent(f"""\
+            #OP     TYPE    DESCRIPTION     CALLOUT INFO    PROGRAM ARG1 ARG2 ARG3 ...
+            #====== ======= =============== =============== ===============================
+            create  user    turkeyutils:*   *               {launcher_path} %k %d %c %S
+            """))
+
+
+@pytest.mark.skip
+class TestInstantiate:
+    def test_instantiate(self, request_key):
+        key = keyutils.request_key(b"turkeyutils:instantiate", keyutils.KEY_SPEC_THREAD_KEYRING, callout_info=b"pytest")
+
+        assert key
+        key_value = keyutils.read_key(key)
+        assert key_value == b'Debug pytest'
+
+    def test_negate(self, request_key):
+        key = keyutils.request_key(b"turkeyutils:negate", keyutils.KEY_SPEC_THREAD_KEYRING, callout_info=b"negate")
+
+        assert not key
+
+    def test_reject(self, request_key):
+        with pytest.raises(keyutils.KeyutilsError) as e:
+            key = keyutils.request_key(b"turkeyutils:reject", keyutils.KEY_SPEC_THREAD_KEYRING, callout_info=b"reject")
+        assert e.value.args[0] == 128
 
 
 if __name__ == "__main__":

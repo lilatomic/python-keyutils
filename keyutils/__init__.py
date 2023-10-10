@@ -47,9 +47,9 @@ def add_key(key, value, keyring, keyType=b"user"):
     return _keyutils.add_key(keyType, key, value, keyring)
 
 
-def request_key(key, keyring, keyType=b"user"):
+def request_key(keyDesc, keyring, keyType=b"user", callout_info=None):
     try:
-        return _keyutils.request_key(keyType, key, None, keyring)
+        return _keyutils.request_key(keyType, keyDesc, callout_info, keyring)
     except KeyutilsError as err:
         return _handle_keyerror(err)
 
@@ -105,13 +105,27 @@ def search(keyring, description, destination=0, keyType=b"user"):
         return _handle_keyerror(err)
 
 
+instantiate = _keyutils.instantiate
+
+def negate(key, keyring, timeout=0):
+    return _keyutils.negate(key, timeout, keyring)
+
+
 def set_timeout(key, timeout):
     """Set timeout in seconds (int)."""
     return _keyutils.set_timeout(key, timeout)
 
 
+def assume_authority(key):
+    return _keyutils.assume_authority(key)
+
+
 def session_to_parent():
     return _keyutils.session_to_parent()
+
+
+def reject(key, keyring, error, timeout=0):
+    return _keyutils.reject(key, timeout, error, keyring)
 
 
 def describe_key(keyId):
