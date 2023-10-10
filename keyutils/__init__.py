@@ -127,6 +127,9 @@ def session_to_parent():
 def reject(key, keyring, error, timeout=0):
     return _keyutils.reject(key, timeout, error, keyring)
 
+def invalidate(key):
+    _keyutils.invalidate(key)
+
 
 def describe_key(keyId):
     return _keyutils.describe_key(keyId)

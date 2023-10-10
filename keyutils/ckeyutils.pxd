@@ -72,5 +72,6 @@ cdef extern from "keyutils.h" nogil:
     int assume_authority "keyctl_assume_authority"(key_serial_t key)
     int session_to_parent "keyctl_session_to_parent"()
     int reject "keyctl_reject"(key_serial_t key, unsigned int timeout, unsigned int error, key_serial_t keyring)
+    int invalidate "keyctl_invalidate"(key_serial_t key)
     int describe_alloc "keyctl_describe_alloc"(int key, char **bufptr)
     int read_alloc "keyctl_read_alloc"(int key, void ** bufptr)

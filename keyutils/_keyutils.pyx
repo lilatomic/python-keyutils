@@ -243,6 +243,13 @@ def reject(int key, unsigned int timeout, unsigned int error, int keyring):
     _throw_err(rc)
     return None
 
+def invalidate(int key):
+    cdef int rc
+    with nogil:
+        rc = ckeyutils.invalidate(key)
+    _throw_err(rc)
+    return None
+
 def describe_key(int key):
     cdef int size
     cdef char *ptr

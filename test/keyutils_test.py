@@ -177,6 +177,18 @@ class BasicTest(unittest.TestCase):
         kperm = int(kperm, base=16)
         self.assertEqual(0, kperm & keyutils.KEY_POS_READ)
 
+    def testInvalidate(self):
+        value = b"invalidate_v"
+        key_id = keyutils.add_key(b"invalidate_n", value, keyutils.KEY_SPEC_THREAD_KEYRING)
+        assert key_id
+        key_value = keyutils.read_key(key_id)
+        assert key_value == value
+
+        keyutils.invalidate(key_id)
+
+        with pytest.raises(keyutils.KeyutilsError):  # TODO: more specific error check
+            keyutils.read_key(key_id)
+
 
 def test_get_keyring_id():
     keyring = keyutils.get_keyring_id(keyutils.KEY_SPEC_THREAD_KEYRING, False)
