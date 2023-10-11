@@ -28,6 +28,10 @@ import keyutils
 from test import crypt_utils
 
 
+@pytest.fixture(scope="function")
+def ring(request):
+    return keyutils.add_ring(request.function.__name__.encode("utf-8"), keyutils.KEY_SPEC_THREAD_KEYRING)
+
 class BasicTest(unittest.TestCase):
     def testSet(self):
         keyDesc = b"test:key:01"
@@ -189,6 +193,17 @@ class BasicTest(unittest.TestCase):
 
         with pytest.raises(keyutils.KeyutilsError):  # TODO: more specific error check
             keyutils.read_key(key_id)
+
+class TestBasic:
+
+    def testGetPersistent(self, ring):
+        bytes_per_key = 4  # TODO: better calculated
+        keys = keyutils.read_key(ring)
+        assert len(keys) == 0
+        key_id = keyutils.get_persistent(os.getuid(), ring)
+        keys = keyutils.read_key(ring)
+        assert len(keys) == bytes_per_key
+        assert key_id == int.from_bytes(keys, sys.byteorder)
 
 
 def test_get_keyring_id():

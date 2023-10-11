@@ -79,6 +79,7 @@ def process_key_bodies(objs: list):
 
 def gen_dh(workdir: Path, gen_dhparam: bool):
     if gen_dhparam:
+        workdir.mkdir(exist_ok=True, parents=True)
         subprocess.run(["openssl", "dhparam", "-check", "-out", str(workdir / "dh.pem"), "2048"])
 
     keyinfo = subprocess.run(["openssl", "genpkey", "-paramfile", str(workdir / "dh.pem"), "-text"], capture_output=True, text=True)

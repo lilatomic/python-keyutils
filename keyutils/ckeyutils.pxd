@@ -73,6 +73,7 @@ cdef extern from "keyutils.h" nogil:
     int session_to_parent "keyctl_session_to_parent"()
     int reject "keyctl_reject"(key_serial_t key, unsigned int timeout, unsigned int error, key_serial_t keyring)
     int invalidate "keyctl_invalidate"(key_serial_t key)
+    int get_persistent "keyctl_get_persistent"(uid_t uid, key_serial_t key)
     int dh_compute_kdf "keyctl_dh_compute_kdf"(key_serial_t priv, key_serial_t prime, key_serial_t base, char *hashname, char *otherinfo, int otherinfolen, char *buffer, size_t buflen)
     int dh_compute_alloc "keyctl_dh_compute_alloc"(key_serial_t priv, key_serial_t prime, key_serial_t base, void **bufptr)
     int describe_alloc "keyctl_describe_alloc"(int key, char **bufptr)

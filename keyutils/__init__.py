@@ -46,6 +46,8 @@ def _handle_keyerror(err: Exception):
 def add_key(desc, value, keyring, keyType=b"user"):
     return _keyutils.add_key(keyType, desc, value, keyring)
 
+def add_ring(desc, keyring):
+    return _keyutils.add_key(b"keyring", desc, None, keyring)
 
 def request_key(keyDesc, keyring, keyType=b"user", callout_info=None):
     try:
@@ -129,6 +131,9 @@ def reject(key, keyring, error, timeout=0):
 
 def invalidate(key):
     return _keyutils.invalidate(key)
+
+def get_persistent(uid, key):
+    return _keyutils.get_persistent(uid, key)
 
 def dh_compute(key_priv, key_prime, key_base):
     return _keyutils.dh_compute(key_priv, key_prime, key_base)

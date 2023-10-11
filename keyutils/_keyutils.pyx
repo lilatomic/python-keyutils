@@ -250,6 +250,12 @@ def invalidate(int key):
     _throw_err(rc)
     return None
 
+def get_persistent(int uid, int key):
+    cdef int rc
+    with nogil:
+        rc = ckeyutils.get_persistent(uid, key)
+    return _throw_err(rc)
+
 def dh_compute(int key_priv, int key_prime, int key_base):
     cdef int size
     cdef void *ptr
