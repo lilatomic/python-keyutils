@@ -78,3 +78,4 @@ cdef extern from "keyutils.h" nogil:
     int dh_compute_alloc "keyctl_dh_compute_alloc"(key_serial_t priv, key_serial_t prime, key_serial_t base, void **bufptr)
     int describe_alloc "keyctl_describe_alloc"(int key, char **bufptr)
     int read_alloc "keyctl_read_alloc"(int key, void ** bufptr)
+    int get_security_alloc "keyctl_get_security_alloc"(key_serial_t key, char **bufptr)

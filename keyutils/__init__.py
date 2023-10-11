@@ -148,3 +148,7 @@ def describe_key(keyId):
 
 def read_key(keyId):
     return _keyutils.read_key(keyId)
+
+
+def get_security(keyid):
+    return _keyutils.get_security(keyid)

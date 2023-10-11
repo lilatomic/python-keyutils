@@ -317,3 +317,17 @@ def read_key(int key):
         obj = PyBytes_FromStringAndSize(<char *> ptr, size)
         stdlib.free(ptr)
         return obj
+
+def get_security(int key):
+    cdef int size
+    cdef char *ptr
+    cdef bytes obj
+    with nogil:
+        size = ckeyutils.get_security_alloc(key, &ptr)
+    print(size)
+    if size < 0:
+        PyErr_SetFromErrno(error)
+    else:
+        obj = PyBytes_FromStringAndSize(ptr, size)
+        stdlib.free(ptr)
+        return obj

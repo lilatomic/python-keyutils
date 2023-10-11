@@ -205,6 +205,9 @@ class TestBasic:
         assert len(keys) == bytes_per_key
         assert key_id == int.from_bytes(keys, sys.byteorder)
 
+    def testGetSecurity(self, ring):
+        security = keyutils.get_security(ring)
+        assert security == b''  # TODO: find out how to apply security labels
 
 def test_get_keyring_id():
     keyring = keyutils.get_keyring_id(keyutils.KEY_SPEC_THREAD_KEYRING, False)
