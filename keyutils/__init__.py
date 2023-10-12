@@ -17,7 +17,7 @@
 
 from __future__ import absolute_import
 
-from typing import Union
+from typing import Union, Optional
 
 from . import _keyutils
 
@@ -46,7 +46,7 @@ def _handle_keyerror(err: Exception):
 def add_key(desc, value, keyring, keyType=b"user"):
     return _keyutils.add_key(keyType, desc, value, keyring)
 
-def add_ring(desc, keyring):
+def add_ring(desc, keyring) -> Optional[int]:
     return _keyutils.add_key(b"keyring", desc, None, keyring)
 
 def request_key(keyDesc, keyring, keyType=b"user", callout_info=None):
@@ -140,6 +140,10 @@ def dh_compute(key_priv, key_prime, key_base):
 
 def dh_compute_kdf(key_priv, key_prime, key_base, hashname, buflen, otherinfo=None):
     return _keyutils.dh_compute_kdf(key_priv, key_prime, key_base, hashname, buflen, otherinfo)
+
+
+def restrict_keyring(keyring, key_type, restriction):
+    return _keyutils.restrict_keyring(keyring, key_type, restriction)
 
 
 def describe_key(keyId):

@@ -292,6 +292,27 @@ def dh_compute_kdf(int key_priv, int key_prime, int key_base, bytes hashname, in
     return obj
 
 
+def restrict_keyring(int keyring, bytes key_type, bytes restriction):
+    cdef int rc
+    cdef char *type_p
+    cdef char *restriction_p
+
+    if key_type is None:
+        type_p = NULL
+    else:
+        type_p = key_type
+
+    if restriction is None:
+        restriction_p = NULL
+    else:
+        restriction_p = restriction
+
+    with nogil:
+        rc = ckeyutils.restrict_keyring(keyring, type_p, restriction_p)
+    _throw_err(rc)
+    return None
+
+
 def describe_key(int key):
     cdef int size
     cdef char *ptr

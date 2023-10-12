@@ -1,6 +1,5 @@
 """Utilities to generate stub cryptographic elements"""
 import base64
-import os
 import re
 import subprocess
 from pathlib import Path
@@ -18,6 +17,7 @@ def read_pem_object(head: str, it):
         else:
             key_data += line.strip()
     raise StopIteration(f"Reached end of key block but did not find trailer. head is {key_name}")
+
 
 def parse_openssl_text(ls):
     keys = []
@@ -40,7 +40,7 @@ def parse_openssl_text(ls):
             current_field = line[:field_name_end]
 
             if not line.endswith(":"):  # data is inline
-                current_data = line[field_name_end+1:].strip()
+                current_data = line[field_name_end + 1:].strip()
             else:
                 current_data = ""  # Reset the data list for the new field
 
@@ -57,14 +57,14 @@ def parse_openssl_text(ls):
 
 def process_openssl_objects(objs: dict):
     out = {}
-    for k,v in objs.items():
+    for k, v in objs.items():
         if k in {"private-key", "public-key", "P"}:
             # out[k] = bytes.fromhex(v.replace(":", ""))
             out[k] = v.replace(":", "").encode("ascii")
         elif re.match("\d+ \(0x\d+\)", v):  # matches '2 (0x2)'
             match = re.match("\d+ \(0x(\d+)\)", v)
             out[k] = match.group(0).encode("utf-8")
-            out[k] = b"02" # TODO: this is a shim
+            out[k] = b"02"  # TODO: this is a shim
         else:
             out[k] = v
     return out
@@ -82,14 +82,15 @@ def gen_dh(workdir: Path, gen_dhparam: bool):
         workdir.mkdir(exist_ok=True, parents=True)
         subprocess.run(["openssl", "dhparam", "-check", "-out", str(workdir / "dh.pem"), "2048"])
 
-    keyinfo = subprocess.run(["openssl", "genpkey", "-paramfile", str(workdir / "dh.pem"), "-text"], capture_output=True, text=True)
+    keyinfo = subprocess.run(["openssl", "genpkey", "-paramfile", str(workdir / "dh.pem"), "-text"],
+                             capture_output=True, text=True)
 
     return keyinfo.stdout
 
 
 def dh_keys(workdir: Path, regen=True):
     openssl_output = gen_dh(workdir, regen).splitlines()
-    keys, objects= parse_openssl_text(openssl_output)
+    keys, objects = parse_openssl_text(openssl_output)
     objects = process_openssl_objects(objects)
     keys = process_key_bodies(keys)
     return keys, objects
@@ -100,6 +101,51 @@ def extract_dh_keyring_items(keys, objects):
         "dh_priv": objects["private-key"],
         "dh_prime": objects["P"],
         "dh_base": objects["G"],
+    }
+
+
+def gen_rsa(workdir, regen: bool):
+    privkey_path = str(workdir / "rsa.pem")
+    if regen:
+        workdir.mkdir(exist_ok=True, parents=True)
+        subprocess.run(["openssl", "genpkey", "-algorithm", "RSA", "-out", privkey_path])
+
+    der_path = str(workdir / "rsa.x509.der")
+    subprocess.run(["openssl", "req", "-new", "-x509", "-key", privkey_path, "-outform", "DER", "-days", "365", "-out", der_path, "-subj", "/C=CA/O=example/CN=turkeyutils-ca"])
+
+    with open(der_path, mode="rb") as der_file:
+        der = der_file.read()
+
+    return der
+
+
+def gen_child_cert(workdir, cadir, regen: bool):
+    privkey_path = str(workdir / "rsa.pem")
+    if regen:
+        workdir.mkdir(exist_ok=True, parents=True)
+        subprocess.run(["openssl", "genpkey", "-algorithm", "RSA", "-out", privkey_path])
+
+    csr_path = str(workdir / "rsa.crt")
+    der_path = str(workdir / "rsa.x509.der")
+
+    subprocess.run(["openssl", "req", "-new", "-key", privkey_path, "-out", csr_path, "-subj", "/C=CA/O=example/CN=turkeyutils-leaf"])
+    subprocess.run(["openssl", "x509", "-req", "-in", csr_path, "-CA", str(cadir/"rsa.x509.der"), "-CAkey", str(cadir/"rsa.pem"), "-CAcreateserial", "-days", "365",  "-outform", "DER", "-out", der_path])
+
+    with open(der_path, mode="rb") as der_file:
+        der = der_file.read()
+
+    return der
+
+
+def rsa_keys(workdir: Path, regen=True):
+    regen = True
+    ca = gen_rsa(workdir / "ca", regen)
+    unsigned = gen_rsa(workdir / "unsigned", regen)
+    leaf = gen_child_cert(workdir / "leaf", workdir / "ca", regen)
+    return {
+        "ca": ca,
+        "unsigned": unsigned,
+        "leaf": leaf,
     }
 
 

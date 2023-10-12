@@ -32,6 +32,7 @@ from test import crypt_utils
 def ring(request):
     return keyutils.add_ring(request.function.__name__.encode("utf-8"), keyutils.KEY_SPEC_THREAD_KEYRING)
 
+
 class BasicTest(unittest.TestCase):
     def testSet(self):
         keyDesc = b"test:key:01"
@@ -194,6 +195,7 @@ class BasicTest(unittest.TestCase):
         with pytest.raises(keyutils.KeyutilsError):  # TODO: more specific error check
             keyutils.read_key(key_id)
 
+
 class TestBasic:
 
     def testGetPersistent(self, ring):
@@ -208,6 +210,7 @@ class TestBasic:
     def testGetSecurity(self, ring):
         security = keyutils.get_security(ring)
         assert security == b''  # TODO: find out how to apply security labels
+
 
 def test_get_keyring_id():
     keyring = keyutils.get_keyring_id(keyutils.KEY_SPEC_THREAD_KEYRING, False)
@@ -281,13 +284,51 @@ class TestDH:
         assert v
         assert len(v) == 520
 
-
     def test_kdf(self, dh_keys):
         keys = {k: keyutils.add_key(k.encode("utf-8"), v, keyutils.KEY_SPEC_THREAD_KEYRING) for k, v in dh_keys.items()}
 
         v = keyutils.dh_compute_kdf(keys["dh_priv"], keys["dh_prime"], keys["dh_base"], b"sha512", 1024)
         assert v
         assert len(v) == 1024
+
+
+@pytest.fixture
+def rsa_keys(tmpdir):
+    regen = not Path("/tmp/rsa/ca/rsa.pem").exists()
+    out = Path("/tmp/rsa")
+
+    return crypt_utils.rsa_keys(out, regen=regen)
+
+
+class TestRestrict:
+    def test_block_all(self, ring):
+        keyutils.restrict_keyring(ring, None, None)
+
+        with pytest.raises(keyutils.KeyutilsError) as e:
+            keyutils.add_key(b"test_restrict_n", b"test_restrict_v", ring)
+        assert e.value.args[1] == 'Operation not permitted'
+
+    def test_restrict_keyring(self, rsa_keys):
+        allowed_ring = keyutils.add_ring(b"test_restrict_keyring_allowed", keyutils.KEY_SPEC_THREAD_KEYRING)
+        allowed_key = keyutils.add_key(b"restrict_allowed", rsa_keys["ca"], allowed_ring, b"asymmetric")
+        target_ring = keyutils.add_ring(b"test_restrict_keyring_target", keyutils.KEY_SPEC_THREAD_KEYRING)
+
+        print(f"key_or_keyring:{allowed_ring}")
+        keyutils.restrict_keyring(target_ring, b"asymmetric", f"key_or_keyring:{allowed_ring}".encode("ascii"))
+
+        # check we can add a permitted key
+        keyutils.link(allowed_key, target_ring)
+        # check we can't add user keys
+        with pytest.raises(keyutils.KeyutilsError) as e:
+            keyutils.add_key(b"test_restrict_user", b"test_restrict_v", target_ring)
+        assert e.value.args[1] == 'Operation not supported'
+        # check we can't add a random x509
+        with pytest.raises(keyutils.KeyutilsError) as e:
+            keyutils.add_key(b"test_restrict_unsigned", rsa_keys["unsigned"], target_ring, b"asymmetric")
+        assert e.value.args[1] == 'Required key not available'
+        # check we can add a signed key
+        leaf_key = keyutils.add_key(b"test_restrict_leaf", rsa_keys["leaf"], target_ring, b"asymmetric")
+        assert leaf_key
 
 
 if __name__ == "__main__":

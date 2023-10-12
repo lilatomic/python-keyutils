@@ -76,6 +76,7 @@ cdef extern from "keyutils.h" nogil:
     int get_persistent "keyctl_get_persistent"(uid_t uid, key_serial_t key)
     int dh_compute_kdf "keyctl_dh_compute_kdf"(key_serial_t priv, key_serial_t prime, key_serial_t base, char *hashname, char *otherinfo, int otherinfolen, char *buffer, size_t buflen)
     int dh_compute_alloc "keyctl_dh_compute_alloc"(key_serial_t priv, key_serial_t prime, key_serial_t base, void **bufptr)
+    int restrict_keyring "keyctl_restrict_keyring"(key_serial_t keyring, const char *key_type, const char *restriction)
     int describe_alloc "keyctl_describe_alloc"(int key, char **bufptr)
     int read_alloc "keyctl_read_alloc"(int key, void ** bufptr)
     int get_security_alloc "keyctl_get_security_alloc"(key_serial_t key, char **bufptr)
