@@ -64,6 +64,9 @@ cdef extern from "keyutils.h" nogil:
     int EKEYREVOKED "EKEYREVOKED"
     int EKEYREJECTED "EKEYREJECTED"
 
+    # keyctl_move flags
+    int KEYCTL_MOVE_EXCL "KEYCTL_MOVE_EXCL"
+
     int add_key "add_key"(char *key_type, char *description, void *payload, int plen, int keyring)
     int request_key "request_key"(char *key_type, char *description, char *callout_info, int keyring)
     key_serial_t get_keyring_id "keyctl_get_keyring_ID"(key_serial_t key, int create)
@@ -92,6 +95,7 @@ cdef extern from "keyutils.h" nogil:
     int pkey_decrypt "keyctl_pkey_decrypt"(key_serial_t key, const char* info, void *enc, size_t enc_len, const void *data, size_t data_len)
     int pkey_sign "keyctl_pkey_sign"(key_serial_t key, const char* info, const void *data, size_t data_len, void *sig, size_t sig_len)
     int pkey_verify "keyctl_pkey_verify"(key_serial_t key, const char* info, const void *data, size_t data_len, void *sig, size_t sig_len)
+    int move "keyctl_move"(key_serial_t key, key_serial_t from_ringid, key_serial_t to_ringid, unsigned int flags)
     int describe_alloc "keyctl_describe_alloc"(int key, char **bufptr)
     int read_alloc "keyctl_read_alloc"(int key, void ** bufptr)
     int get_security_alloc "keyctl_get_security_alloc"(key_serial_t key, char **bufptr)

@@ -34,6 +34,14 @@ def ring(request):
     return keyutils.add_ring(request.function.__name__.encode("utf-8"), keyutils.KEY_SPEC_THREAD_KEYRING)
 
 
+def rings(parent: int, n: int = 2):
+    rings = []
+    for i in range(0, n):
+        rings.append(keyutils.add_ring(str(i).encode("utf-8"), parent))
+    return rings
+
+
+
 class BasicTest(unittest.TestCase):
     def testSet(self):
         keyDesc = b"test:key:01"
@@ -212,6 +220,20 @@ class TestBasic:
         security = keyutils.get_security(ring)
         assert security == b''  # TODO: find out how to apply security labels
 
+    def test_move(self, ring):
+        children = rings(ring, 2)
+        key = keyutils.add_key(b"test_move_k", b"test_move_v", children[0])
+
+        keyutils.move(key, children[0], children[1])
+
+    def test_move_exclusive(self, ring):
+        r_from, r_to = rings(ring, 2)
+        key = keyutils.add_key(b"test_move_k", b"test_move_v", r_from)
+        keyutils.link(key, r_to)
+
+        with pytest.raises(keyutils.KeyutilsError) as e:
+            keyutils.move(key, r_from, r_to, keyutils.KEYCTL_MOVE_EXCL)
+        assert e.value.args[1] == 'File exists'
 
 def test_get_keyring_id():
     keyring = keyutils.get_keyring_id(keyutils.KEY_SPEC_THREAD_KEYRING, False)

@@ -173,6 +173,10 @@ def pkey_verify(key, data: bytes, sig: bytes, info: bytes = b'') -> bytes:
     return _keyutils.pkey_verify(key, info, data, sig)
 
 
+def move(key, from_ringid, to_ringid, flags=0):
+    return _keyutils.move(key, from_ringid, to_ringid, flags)
+
+
 def describe_key(keyId):
     return _keyutils.describe_key(keyId)
 

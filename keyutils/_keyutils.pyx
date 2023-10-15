@@ -74,6 +74,7 @@ class constants:
     EKEYREVOKED = ckeyutils.EKEYREVOKED
     EKEYREJECTED = ckeyutils.EKEYREJECTED
 
+    KEYCTL_MOVE_EXCL = ckeyutils.KEYCTL_MOVE_EXCL
 
 def _throw_err(int rc):
     if rc < 0:
@@ -364,7 +365,6 @@ def pkey_sign(int key, bytes info, bytes data):
     cdef int sig_len = 256  # TODO: actually query this
     cdef bytes obj
 
-    print(data)
     with nogil:
         rc = ckeyutils.pkey_sign(
             key, info_p, data_p, data_len, sig_p, sig_len
@@ -387,6 +387,14 @@ def pkey_verify(int key, bytes info, bytes data, bytes sig):
             key, info_p, data_p, data_len, <void *> sig_p, sig_len
         )
     return _throw_err(rc)
+
+def move(int key, int from_ringid, int to_ringid, unsigned int flags):
+    cdef int rc
+    with nogil:
+        rc = ckeyutils.move(key, from_ringid, to_ringid, flags)
+    _throw_err(rc)
+    return None
+
 
 def describe_key(int key):
     cdef int size
