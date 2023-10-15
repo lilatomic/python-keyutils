@@ -21,7 +21,6 @@ from typing import Union, Optional
 
 from . import _keyutils
 
-
 for k, v in _keyutils.constants.__dict__.items():
     globals()[k] = v
 del k, v
@@ -34,7 +33,6 @@ from errno import (  # noqa: F401,E402 , imported for reexport; TODO: better ree
     ENOMEM,
 )
 
-
 KeyutilsError = _keyutils.error
 
 
@@ -43,17 +41,21 @@ def _handle_keyerror(err: Exception):
         return None
     raise err
 
+
 def add_key(desc, value, keyring, keyType=b"user"):
     return _keyutils.add_key(keyType, desc, value, keyring)
 
+
 def add_ring(desc, keyring) -> Optional[int]:
     return _keyutils.add_key(b"keyring", desc, None, keyring)
+
 
 def request_key(keyDesc, keyring, keyType=b"user", callout_info=None):
     try:
         return _keyutils.request_key(keyType, keyDesc, callout_info, keyring)
     except KeyutilsError as err:
         return _handle_keyerror(err)
+
 
 def get_keyring_id(key, create: bool):
     try:
@@ -109,6 +111,7 @@ def search(keyring, description, destination=0, keyType=b"user"):
 
 instantiate = _keyutils.instantiate
 
+
 def negate(key, keyring, timeout=0):
     return _keyutils.negate(key, timeout, keyring)
 
@@ -129,14 +132,18 @@ def session_to_parent():
 def reject(key, keyring, error, timeout=0):
     return _keyutils.reject(key, timeout, error, keyring)
 
+
 def invalidate(key):
     return _keyutils.invalidate(key)
+
 
 def get_persistent(uid, key):
     return _keyutils.get_persistent(uid, key)
 
+
 def dh_compute(key_priv, key_prime, key_base):
     return _keyutils.dh_compute(key_priv, key_prime, key_base)
+
 
 def dh_compute_kdf(key_priv, key_prime, key_base, hashname, buflen, otherinfo=None):
     return _keyutils.dh_compute_kdf(key_priv, key_prime, key_base, hashname, buflen, otherinfo)
@@ -144,6 +151,26 @@ def dh_compute_kdf(key_priv, key_prime, key_base, hashname, buflen, otherinfo=No
 
 def restrict_keyring(keyring, key_type, restriction):
     return _keyutils.restrict_keyring(keyring, key_type, restriction)
+
+
+def pkey_query(key, info: bytes = b''):
+    return _keyutils.pkey_query(key, info)
+
+
+def pkey_encrypt(key, data: bytes, info: bytes = b'') -> bytes:
+    return _keyutils.pkey_encrypt(key, info, data)
+
+
+def pkey_decrypt(key, enc: bytes, info: bytes = b'') -> bytes:
+    return _keyutils.pkey_decrypt(key, info, enc)
+
+
+def pkey_sign(key, data: bytes, info: bytes = b'') -> bytes:
+    return _keyutils.pkey_sign(key, info, data)
+
+
+def pkey_verify(key, data: bytes, sig: bytes, info: bytes = b'') -> bytes:
+    return _keyutils.pkey_verify(key, info, data, sig)
 
 
 def describe_key(keyId):

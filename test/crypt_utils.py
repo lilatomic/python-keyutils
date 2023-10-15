@@ -115,8 +115,10 @@ def gen_rsa(workdir, regen: bool):
 
     with open(der_path, mode="rb") as der_file:
         der = der_file.read()
+    with open(privkey_path, mode="rb") as privkey_file:
+        key = privkey_file.read()
 
-    return der
+    return key, der
 
 
 def gen_child_cert(workdir, cadir, regen: bool):
@@ -133,19 +135,37 @@ def gen_child_cert(workdir, cadir, regen: bool):
 
     with open(der_path, mode="rb") as der_file:
         der = der_file.read()
+    with open(privkey_path, mode="rb") as privkey_file:
+        key = privkey_file.read()
 
-    return der
+    return key, der
+
+
+def rsa_to_pkcs8(workdir):
+    privkey_path = str(workdir / "rsa.pem")
+    pkcs8_path = str(workdir / "rsa.pkcs8.der")
+
+    subprocess.run(["openssl", "pkcs8", "-in", privkey_path, "-topk8", "-nocrypt", "-outform", "DER", "-out", pkcs8_path], check=True)
+
+    with open(pkcs8_path, mode="rb") as pkcs8_file:
+        pkcs8 = pkcs8_file.read()
+
+    return pkcs8
 
 
 def rsa_keys(workdir: Path, regen=True):
-    regen = True
-    ca = gen_rsa(workdir / "ca", regen)
-    unsigned = gen_rsa(workdir / "unsigned", regen)
-    leaf = gen_child_cert(workdir / "leaf", workdir / "ca", regen)
+    ca_key, ca_cert = gen_rsa(workdir / "ca", regen)
+    unsigned_key, unsigned_cert = gen_rsa(workdir / "unsigned", regen)
+    leaf_key, leaf_cert = gen_child_cert(workdir / "leaf", workdir / "ca", regen)
+    pkcs8 = rsa_to_pkcs8(workdir/ "unsigned")
     return {
-        "ca": ca,
-        "unsigned": unsigned,
-        "leaf": leaf,
+        "ca": ca_cert,
+        "unsigned": unsigned_cert,
+        "leaf": leaf_cert,
+        "ca_key": ca_key,
+        "unsigned_key": unsigned_key,
+        "leaf_key": leaf_key,
+        "pkcs8": pkcs8
     }
 
 

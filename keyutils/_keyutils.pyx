@@ -81,7 +81,6 @@ def _throw_err(int rc):
     else:
         return rc
 
-
 def add_key(bytes key_type, bytes description, bytes payload, int keyring):
     cdef int rc
     cdef char *key_type_p = key_type
@@ -274,7 +273,7 @@ def dh_compute_kdf(int key_priv, int key_prime, int key_base, bytes hashname, in
     cdef int otherinfo_len
     cdef char *hashname_p = hashname
     cdef char *otherinfo_p
-    cdef char *buffer = <char *>stdlib.malloc(buflen)
+    cdef char *buffer = <char *> stdlib.malloc(buflen)
     cdef bytes obj
 
     if otherinfo is None:
@@ -290,7 +289,6 @@ def dh_compute_kdf(int key_priv, int key_prime, int key_base, bytes hashname, in
     # TODO: check we aren't leaving buffer allocated
     obj = PyBytes_FromStringAndSize(<char *> buffer, buflen)
     return obj
-
 
 def restrict_keyring(int keyring, bytes key_type, bytes restriction):
     cdef int rc
@@ -312,6 +310,83 @@ def restrict_keyring(int keyring, bytes key_type, bytes restriction):
     _throw_err(rc)
     return None
 
+def pkey_query(int key, bytes info):
+    cdef int rc
+    cdef const char * info_p = info
+    cdef ckeyutils.keyctl_pkey_query result
+    with nogil:
+        rc = ckeyutils.pkey_query(key, info_p, &result)
+    _throw_err(rc)
+    return result
+
+# TODO: proper output buffer length
+# TODO: read bytes written from RC
+def pkey_encrypt(int key, bytes info, bytes data):
+    cdef int rc
+    cdef const char *info_p = info
+    cdef const char *data_p = data
+    cdef int data_len = len(data)
+    cdef void *enc_p = stdlib.malloc(256)
+    cdef int enc_len = 256
+    cdef bytes obj
+    with nogil:
+        rc = ckeyutils.pkey_encrypt(
+            key, info_p, data_p, data_len, enc_p, enc_len
+        )
+    _throw_err(rc)
+    # TODO: check we aren't leaving buffer allocated
+    obj = PyBytes_FromStringAndSize(<char *> enc_p, enc_len)
+    return obj
+
+def pkey_decrypt(int key, bytes info, bytes enc):
+    cdef int rc
+    cdef const char *info_p = info
+    cdef const char *enc_p = enc
+    cdef int enc_len = len(enc)
+    cdef void *data_p = stdlib.malloc(256)
+    cdef int data_len = 256  # TODO: actually query this
+    cdef bytes obj
+    with nogil:
+        rc = ckeyutils.pkey_decrypt(
+            key, info_p, enc_p, enc_len, data_p, data_len
+        )
+    _throw_err(rc)
+    # TODO: check we aren't leaving buffer allocated
+    obj = PyBytes_FromStringAndSize(<char *> data_p, data_len)
+    return obj
+
+def pkey_sign(int key, bytes info, bytes data):
+    cdef int rc
+    cdef const char *info_p = info
+    cdef const char *data_p = data
+    cdef int data_len = len(data)
+    cdef void *sig_p = stdlib.malloc(256)
+    cdef int sig_len = 256  # TODO: actually query this
+    cdef bytes obj
+
+    print(data)
+    with nogil:
+        rc = ckeyutils.pkey_sign(
+            key, info_p, data_p, data_len, sig_p, sig_len
+        )
+    _throw_err(rc)
+    # TODO: check we aren't leaving buffer allocated
+    obj = PyBytes_FromStringAndSize(<char *> sig_p, sig_len)
+    return obj
+
+def pkey_verify(int key, bytes info, bytes data, bytes sig):
+    cdef int rc
+    cdef const char *info_p = info
+    cdef const char *data_p = data
+    cdef int data_len = len(data)
+    cdef const char *sig_p = sig
+    cdef int sig_len = len(sig)
+    cdef bytes obj
+    with nogil:
+        rc = ckeyutils.pkey_verify(
+            key, info_p, data_p, data_len, <void *> sig_p, sig_len
+        )
+    return _throw_err(rc)
 
 def describe_key(int key):
     cdef int size

@@ -5,6 +5,16 @@ cdef extern from "keyutils.h" nogil:
     ctypedef uint32_t uid_t
     ctypedef uint32_t gid_t
 
+    cdef struct keyctl_pkey_query:
+        unsigned int	supported_ops;	#  Which ops are supported
+        unsigned int	key_size;	#  Size of the key in bits
+        unsigned short	max_data_size;	#  Maximum size of raw data to sign in bytes
+        unsigned short	max_sig_size;	#  Maximum size of signature in bytes
+        unsigned short	max_enc_size;	#  Maximum size of encrypted blob in bytes
+        unsigned short	max_dec_size;	#  Maximum size of decrypted blob in bytes
+        unsigned int	__spare[10];
+
+
     # special process keyring shortcut IDs
     int KEY_SPEC_THREAD_KEYRING "KEY_SPEC_THREAD_KEYRING"
     int KEY_SPEC_PROCESS_KEYRING "KEY_SPEC_PROCESS_KEYRING"
@@ -77,6 +87,11 @@ cdef extern from "keyutils.h" nogil:
     int dh_compute_kdf "keyctl_dh_compute_kdf"(key_serial_t priv, key_serial_t prime, key_serial_t base, char *hashname, char *otherinfo, int otherinfolen, char *buffer, size_t buflen)
     int dh_compute_alloc "keyctl_dh_compute_alloc"(key_serial_t priv, key_serial_t prime, key_serial_t base, void **bufptr)
     int restrict_keyring "keyctl_restrict_keyring"(key_serial_t keyring, const char *key_type, const char *restriction)
+    int pkey_query "keyctl_pkey_query"(key_serial_t key, const char *info, keyctl_pkey_query *result)
+    int pkey_encrypt "keyctl_pkey_encrypt"(key_serial_t key, const char* info, const void *data, size_t data_len, void *enc, size_t enc_len)
+    int pkey_decrypt "keyctl_pkey_decrypt"(key_serial_t key, const char* info, void *enc, size_t enc_len, const void *data, size_t data_len)
+    int pkey_sign "keyctl_pkey_sign"(key_serial_t key, const char* info, const void *data, size_t data_len, void *sig, size_t sig_len)
+    int pkey_verify "keyctl_pkey_verify"(key_serial_t key, const char* info, const void *data, size_t data_len, void *sig, size_t sig_len)
     int describe_alloc "keyctl_describe_alloc"(int key, char **bufptr)
     int read_alloc "keyctl_read_alloc"(int key, void ** bufptr)
     int get_security_alloc "keyctl_get_security_alloc"(key_serial_t key, char **bufptr)

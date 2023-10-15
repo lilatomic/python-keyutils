@@ -16,6 +16,7 @@
 
 
 import os
+import subprocess
 import sys
 import textwrap
 import time
@@ -329,6 +330,46 @@ class TestRestrict:
         # check we can add a signed key
         leaf_key = keyutils.add_key(b"test_restrict_leaf", rsa_keys["leaf"], target_ring, b"asymmetric")
         assert leaf_key
+
+
+def supports_pkcs8():
+    lsmod = subprocess.run(["lsmod"], capture_output=True, text=True)
+    return "pkcs8_key_parser" in lsmod.stdout
+
+
+needs_pkcs8 = pytest.mark.skipif(not supports_pkcs8(), reason="requires pkcs8 parser to insert ")
+
+
+class TestPKey:
+    def test_query(self, ring, rsa_keys):
+        pkey = keyutils.add_key(b"test_pkey", rsa_keys["ca"], ring, b"asymmetric")
+        query_result = keyutils.pkey_query(pkey)
+        assert query_result["key_size"] == 2048
+
+    @needs_pkcs8
+    def test_encrypt(self, ring, rsa_keys):
+        pkey = keyutils.add_key(b"test_pkey_encrypt", rsa_keys["pkcs8"], ring, b"asymmetric")
+        data = b"hihello".ljust(256, b"0")
+        enc = keyutils.pkey_encrypt(pkey, data)
+        assert enc
+        dec = keyutils.pkey_decrypt(pkey, enc)
+        assert dec == data
+
+    @needs_pkcs8
+    def test_sign(self, ring, rsa_keys):
+        pkey = keyutils.add_key(b"test_pkey_verify", rsa_keys["pkcs8"], ring, b"asymmetric")
+        # data = b"hihello".ljust(256, b"0")
+        data = b"hihello"
+        sig = keyutils.pkey_sign(pkey, data, info=b'enc=pkcs1 hash=sha256')
+        assert len(sig) == 256
+        verify = keyutils.pkey_verify(pkey, data, sig, info=b'enc=pkcs1 hash=sha256')
+        assert verify == 0
+
+        bad_data = b"some bad data"
+        with pytest.raises(keyutils.KeyutilsError) as e:
+            bad_verify = keyutils.pkey_verify(pkey, bad_data, sig, info=b'enc=pkcs1 hash=sha256')
+        assert e.value.args[1] == 'Key was rejected by service'
+
 
 
 if __name__ == "__main__":
