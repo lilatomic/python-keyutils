@@ -76,6 +76,18 @@ class constants:
 
     KEYCTL_MOVE_EXCL = ckeyutils.KEYCTL_MOVE_EXCL
 
+    KEYCTL_CAPS0_CAPABILITIES = ckeyutils.KEYCTL_CAPS0_CAPABILITIES
+    KEYCTL_CAPS0_PERSISTENT_KEYRINGS = ckeyutils.KEYCTL_CAPS0_PERSISTENT_KEYRINGS
+    KEYCTL_CAPS0_DIFFIE_HELLMAN = ckeyutils.KEYCTL_CAPS0_DIFFIE_HELLMAN
+    KEYCTL_CAPS0_PUBLIC_KEY = ckeyutils.KEYCTL_CAPS0_PUBLIC_KEY
+    KEYCTL_CAPS0_BIG_KEY = ckeyutils.KEYCTL_CAPS0_BIG_KEY
+    KEYCTL_CAPS0_INVALIDATE = ckeyutils.KEYCTL_CAPS0_INVALIDATE
+    KEYCTL_CAPS0_RESTRICT_KEYRING = ckeyutils.KEYCTL_CAPS0_RESTRICT_KEYRING
+    KEYCTL_CAPS0_MOVE = ckeyutils.KEYCTL_CAPS0_MOVE
+    # KEYCTL_CAPS1_NS_KEYRING_NAME = ckeyutils.KEYCTL_CAPS1_NS_KEYRING_NAME
+    # KEYCTL_CAPS1_NS_KEY_TAG = ckeyutils.KEYCTL_CAPS1_NS_KEY_TAG
+    # KEYCTL_CAPS1_NOTIFICATIONS = ckeyutils.KEYCTL_CAPS1_NOTIFICATIONS
+
 def _throw_err(int rc):
     if rc < 0:
         PyErr_SetFromErrno(error)
@@ -394,6 +406,19 @@ def move(int key, int from_ringid, int to_ringid, unsigned int flags):
         rc = ckeyutils.move(key, from_ringid, to_ringid, flags)
     _throw_err(rc)
     return None
+
+
+def capabilities():
+    cdef int rc
+    cdef int buflen = 4
+    cdef unsigned char *buffer = <unsigned char *> stdlib.malloc(buflen)
+    cdef bytes obj
+    with nogil:
+        rc = ckeyutils.capabilities(buffer, buflen)
+    _throw_err(rc)
+    # TODO: check we aren't leaving buffer allocated
+    obj = PyBytes_FromStringAndSize(<char *> buffer, buflen)
+    return obj
 
 
 def describe_key(int key):

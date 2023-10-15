@@ -67,6 +67,19 @@ cdef extern from "keyutils.h" nogil:
     # keyctl_move flags
     int KEYCTL_MOVE_EXCL "KEYCTL_MOVE_EXCL"
 
+    # keyctl_capabilities output fields
+    int KEYCTL_CAPS0_CAPABILITIES "KEYCTL_CAPS0_CAPABILITIES"
+    int KEYCTL_CAPS0_PERSISTENT_KEYRINGS "KEYCTL_CAPS0_PERSISTENT_KEYRINGS"
+    int KEYCTL_CAPS0_DIFFIE_HELLMAN "KEYCTL_CAPS0_DIFFIE_HELLMAN"
+    int KEYCTL_CAPS0_PUBLIC_KEY "KEYCTL_CAPS0_PUBLIC_KEY"
+    int KEYCTL_CAPS0_BIG_KEY "KEYCTL_CAPS0_BIG_KEY"
+    int KEYCTL_CAPS0_INVALIDATE "KEYCTL_CAPS0_INVALIDATE"
+    int KEYCTL_CAPS0_RESTRICT_KEYRING "KEYCTL_CAPS0_RESTRICT_KEYRING"
+    int KEYCTL_CAPS0_MOVE "KEYCTL_CAPS0_MOVE"
+    # int KEYCTL_CAPS1_NS_KEYRING_NAME "KEYCTL_CAPS1_NS_KEYRING_NAME"
+    # int KEYCTL_CAPS1_NS_KEY_TAG "KEYCTL_CAPS1_NS_KEY_TAG"
+    # int KEYCTL_CAPS1_NOTIFICATIONS "KEYCTL_CAPS1_NOTIFICATIONS"
+
     int add_key "add_key"(char *key_type, char *description, void *payload, int plen, int keyring)
     int request_key "request_key"(char *key_type, char *description, char *callout_info, int keyring)
     key_serial_t get_keyring_id "keyctl_get_keyring_ID"(key_serial_t key, int create)
@@ -96,6 +109,7 @@ cdef extern from "keyutils.h" nogil:
     int pkey_sign "keyctl_pkey_sign"(key_serial_t key, const char* info, const void *data, size_t data_len, void *sig, size_t sig_len)
     int pkey_verify "keyctl_pkey_verify"(key_serial_t key, const char* info, const void *data, size_t data_len, void *sig, size_t sig_len)
     int move "keyctl_move"(key_serial_t key, key_serial_t from_ringid, key_serial_t to_ringid, unsigned int flags)
+    int capabilities "keyctl_capabilities"(unsigned char *buffer, size_t buflen)
     int describe_alloc "keyctl_describe_alloc"(int key, char **bufptr)
     int read_alloc "keyctl_read_alloc"(int key, void ** bufptr)
     int get_security_alloc "keyctl_get_security_alloc"(key_serial_t key, char **bufptr)

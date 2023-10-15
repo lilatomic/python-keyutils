@@ -235,6 +235,11 @@ class TestBasic:
             keyutils.move(key, r_from, r_to, keyutils.KEYCTL_MOVE_EXCL)
         assert e.value.args[1] == 'File exists'
 
+    def test_capabilities(self):
+        caps = keyutils.capabilities()
+        assert caps
+        assert not caps.startswith(b'\x00') # the first byte will contain the results, and it should contain _something_
+
 def test_get_keyring_id():
     keyring = keyutils.get_keyring_id(keyutils.KEY_SPEC_THREAD_KEYRING, False)
     assert keyring is not None and keyring != 0

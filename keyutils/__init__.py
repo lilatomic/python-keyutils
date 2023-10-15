@@ -177,6 +177,10 @@ def move(key, from_ringid, to_ringid, flags=0):
     return _keyutils.move(key, from_ringid, to_ringid, flags)
 
 
+def capabilities() -> bytes:
+    return _keyutils.capabilities()
+
+
 def describe_key(keyId):
     return _keyutils.describe_key(keyId)
 
