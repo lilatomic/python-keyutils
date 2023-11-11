@@ -17,9 +17,10 @@
 
 from __future__ import absolute_import
 
-from typing import Union, Optional
+from typing import Optional, Union
 
 from . import _keyutils
+
 
 for k, v in _keyutils.constants.__dict__.items():
     globals()[k] = v
@@ -32,6 +33,7 @@ from errno import (  # noqa: F401,E402 , imported for reexport; TODO: better ree
     EINVAL,
     ENOMEM,
 )
+
 
 KeyutilsError = _keyutils.error
 

@@ -61,8 +61,8 @@ def process_openssl_objects(objs: dict):
         if k in {"private-key", "public-key", "P"}:
             # out[k] = bytes.fromhex(v.replace(":", ""))
             out[k] = v.replace(":", "").encode("ascii")
-        elif re.match("\d+ \(0x\d+\)", v):  # matches '2 (0x2)'
-            match = re.match("\d+ \(0x(\d+)\)", v)
+        elif re.match(r"\d+ \(0x\d+\)", v):  # matches '2 (0x2)'
+            match = re.match(r"\d+ \(0x(\d+)\)", v)
             out[k] = match.group(0).encode("utf-8")
             out[k] = b"02"  # TODO: this is a shim
         else:
@@ -131,7 +131,23 @@ def gen_child_cert(workdir, cadir, regen: bool):
     der_path = str(workdir / "rsa.x509.der")
 
     subprocess.run(["openssl", "req", "-new", "-key", privkey_path, "-out", csr_path, "-subj", "/C=CA/O=example/CN=turkeyutils-leaf"])
-    subprocess.run(["openssl", "x509", "-req", "-in", csr_path, "-CA", str(cadir/"rsa.x509.der"), "-CAkey", str(cadir/"rsa.pem"), "-CAcreateserial", "-days", "365",  "-outform", "DER", "-out", der_path])
+    subprocess.run([
+        "openssl",
+        "x509",
+        "-req",
+        "-in",
+        csr_path,
+        "-CA",
+        str(cadir / "rsa.x509.der"),
+        "-CAkey", str(cadir / "rsa.pem"),
+        "-CAcreateserial",
+        "-days",
+        "365",
+        "-outform",
+        "DER",
+        "-out",
+        der_path
+    ])
 
     with open(der_path, mode="rb") as der_file:
         der = der_file.read()
@@ -157,7 +173,7 @@ def rsa_keys(workdir: Path, regen=True):
     ca_key, ca_cert = gen_rsa(workdir / "ca", regen)
     unsigned_key, unsigned_cert = gen_rsa(workdir / "unsigned", regen)
     leaf_key, leaf_cert = gen_child_cert(workdir / "leaf", workdir / "ca", regen)
-    pkcs8 = rsa_to_pkcs8(workdir/ "unsigned")
+    pkcs8 = rsa_to_pkcs8(workdir / "unsigned")
     return {
         "ca": ca_cert,
         "unsigned": unsigned_cert,

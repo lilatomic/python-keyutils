@@ -1,5 +1,6 @@
 from libc.stdint cimport int32_t, uint32_t
 
+
 cdef extern from "keyutils.h" nogil:
     ctypedef int32_t key_serial_t
     ctypedef uint32_t uid_t

@@ -18,7 +18,6 @@
 import os
 import subprocess
 import sys
-import textwrap
 import time
 import unittest
 from pathlib import Path
@@ -27,6 +26,17 @@ import pytest
 
 import keyutils
 from test import crypt_utils
+
+
+def has_sudo():
+    """
+    Test that we have root capabilities which we need for privileged key operations
+    """
+    proc = subprocess.run(["sudo", "-v", "-n"], capture_output=True, text=True)
+    return proc.returncode == 0
+
+
+needs_sudo = pytest.mark.skipif(not has_sudo(), reason="requires sudo permissions")
 
 
 @pytest.fixture(scope="function")
@@ -39,7 +49,6 @@ def rings(parent: int, n: int = 2):
     for i in range(0, n):
         rings.append(keyutils.add_ring(str(i).encode("utf-8"), parent))
     return rings
-
 
 
 class BasicTest(unittest.TestCase):
@@ -122,6 +131,9 @@ class BasicTest(unittest.TestCase):
         self.assertEqual(keyutils.search(parent, desc), None)
         keyutils.link(child, parent)
         self.assertEqual(keyutils.search(parent, desc), keyId)
+
+        keyutils.unlink(child, parent)
+        self.assertEqual(keyutils.search(parent, desc), None)
 
     def testTimeout(self):
         desc = b"dummyKey"
@@ -238,44 +250,30 @@ class TestBasic:
     def test_capabilities(self):
         caps = keyutils.capabilities()
         assert caps
-        assert not caps.startswith(b'\x00') # the first byte will contain the results, and it should contain _something_
+        assert not caps.startswith(b'\x00')  # the first byte will contain the results, and it should contain _something_
+
 
 def test_get_keyring_id():
     keyring = keyutils.get_keyring_id(keyutils.KEY_SPEC_THREAD_KEYRING, False)
     assert keyring is not None and keyring != 0
 
 
-@pytest.mark.skip
-class TestNeedsSudo:
-    def test_keyring_chown(self):
-        key_id = keyutils.add_key(b"chown_n", b"chown_v", keyutils.KEY_SPEC_THREAD_KEYRING)
+@pytest.mark.xfail(reason="Not implemented")
+@needs_sudo
+def test_keyring_chown(self):
+    # TODO: implement this
+    keyutils.add_key(b"chown_n", b"chown_v", keyutils.KEY_SPEC_THREAD_KEYRING)
+    raise NotImplementedError()
 
 
 @pytest.fixture
 def request_key(tmpdir):
-    # Create a launcher script to get around a parser limitation in `/sbin/request-key`.
-    # request-key will take the executable path as everything up to the last "/",
-    # which is a problem for having both the python and the script file with absolute paths.
-    # eg "/path/to/bin/python /path/to/script.py %k %d %c %S"
-    # is parsed as ["/path/to/bin/python /path/to/script.py", "%k", "%d", "%c", "%S"]
-    launcher_path = Path(tmpdir) / "key_req.sh"
-    with open(launcher_path, mode="w", encoding="utf-8") as launcher:
-        launcher.write(textwrap.dedent(f"""\
-            #!/bin/bash
-            {sys.executable} {Path(__file__).parent / "key_req.py"} $@
-            """))
-        os.chmod(launcher_path, 0o755)
-
-    with open(Path("/etc/request-key.d/turkeyutils.conf"), mode="w", encoding="utf-8") as config:
-        # add a config for to call into our executable for key requests
-        config.write(textwrap.dedent(f"""\
-            #OP     TYPE    DESCRIPTION     CALLOUT INFO    PROGRAM ARG1 ARG2 ARG3 ...
-            #====== ======= =============== =============== ===============================
-            create  user    turkeyutils:*   *               {launcher_path} %k %d %c %S
-            """))
+    subprocess.run(["sudo", "-n", sys.executable, Path(__file__).parent / "key_req.py", tmpdir, "True"])
+    yield
+    subprocess.run(["sudo", "-n", sys.executable, Path(__file__).parent / "key_req.py", tmpdir, "False"])
 
 
-@pytest.mark.skip
+@needs_sudo
 class TestInstantiate:
     def test_instantiate(self, request_key):
         key = keyutils.request_key(b"turkeyutils:instantiate", keyutils.KEY_SPEC_THREAD_KEYRING, callout_info=b"pytest")
@@ -291,8 +289,12 @@ class TestInstantiate:
 
     def test_reject(self, request_key):
         with pytest.raises(keyutils.KeyutilsError) as e:
-            key = keyutils.request_key(b"turkeyutils:reject", keyutils.KEY_SPEC_THREAD_KEYRING, callout_info=b"reject")
+            keyutils.request_key(b"turkeyutils:reject", keyutils.KEY_SPEC_THREAD_KEYRING, callout_info=b"reject")
         assert e.value.args[0] == 128
+
+    def test_instantiation_failed(self, request_key):
+        key = keyutils.request_key(b"aaaa:aaaa", keyutils.KEY_SPEC_THREAD_KEYRING, callout_info=b"pytest")
+        assert key is None
 
 
 @pytest.fixture
@@ -360,11 +362,15 @@ class TestRestrict:
 
 
 def supports_pkcs8():
+    """
+    We need the pkcs8_key_parser to be loaded in order to handle asymmetric operations
+    Try loading it with `sudo modprobe pkcs8_key_parser`
+    """
     lsmod = subprocess.run(["lsmod"], capture_output=True, text=True)
     return "pkcs8_key_parser" in lsmod.stdout
 
 
-needs_pkcs8 = pytest.mark.skipif(not supports_pkcs8(), reason="requires pkcs8 parser to insert ")
+needs_pkcs8 = pytest.mark.skipif(not supports_pkcs8(), reason="requires pkcs8 parser to insert asymmetric keys")
 
 
 class TestPKey:
@@ -394,9 +400,8 @@ class TestPKey:
 
         bad_data = b"some bad data"
         with pytest.raises(keyutils.KeyutilsError) as e:
-            bad_verify = keyutils.pkey_verify(pkey, bad_data, sig, info=b'enc=pkcs1 hash=sha256')
+            keyutils.pkey_verify(pkey, bad_data, sig, info=b'enc=pkcs1 hash=sha256')
         assert e.value.args[1] == 'Key was rejected by service'
-
 
 
 if __name__ == "__main__":
