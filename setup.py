@@ -24,7 +24,7 @@ with open("README.rst", "r", encoding="utf-8") as f:
 
 setup(
     name="turkeyutils",
-    version="0.6.1",
+    version="0.7.0",
     description="keyutils bindings for Python",
     long_description=long_description,
     author="Daniel Goldman",
