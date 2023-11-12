@@ -45,7 +45,8 @@ def install(tmpdir, install):
         with open(launcher_path, mode="w", encoding="utf-8") as launcher:
             launcher.write(textwrap.dedent(f"""\
                 #!/bin/bash
-                {sys.executable} {Path(__file__)} $@
+                cd {Path(__file__).parent.parent}
+                {sys.executable} -m coverage run {Path(__file__)} $@
                 """))
             os.chmod(launcher_path, 0o755)
 
